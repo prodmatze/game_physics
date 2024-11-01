@@ -27,6 +27,7 @@ let dragging = false;
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
 
+  //create and style buttons 
   reset_button = createButton('RESET');
   new_button = createButton('NEW');
 
@@ -41,8 +42,6 @@ function setup() {
   new_button.style('font-size', '20px');
   new_button.style('padding', '15px 30px');
   new_button.style('border-radius', '10px');
-
-  position_buttons();
 
   //button interactions
   reset_button.mousePressed(reset_game);
@@ -130,10 +129,17 @@ var ball = {
   y: metric.height + metric.slingshot_height + 15 / 2,
 }
 
+let ball_x = slingshot.x1 - metric.slingshot_width / 2;
+let ball_y = metric.height + metric.slingshot_height;
+let ball_d = 15;
+
 var slingshot_center = {
   x: slingshot.x1 - metric.slingshot_width / 2,
   y: metric.height + metric.slingshot_height,
 }
+
+let mx;
+let my;
 
 /* run program */
 function draw() {
@@ -147,17 +153,20 @@ function draw() {
   position_buttons();
 
   //status text
+  if (remaining_attempts > 0) {
+    status_text = `⛳ Score: ${score} - Remaining attempts: ${remaining_attempts} 🏌️`;
+  } else {
+    status_text = `No remaining attempts! 😔`
+  }
+
   textAlign(CENTER, TOP);
-  textSize(32 * M);
-  text(status_text, canvasWidth / 2, padding);
-
-  console.log(dragging)
-
+  textSize(32);
+  text(status_text, canvasWidth / 2, padding * 2);
 
 
   /* calculation */
-  let mx = mouseX_to_internal(mouseX);
-  let my = mouseY_to_internal(mouseY);
+  mx = mouseX_to_internal(mouseX);
+  my = mouseY_to_internal(mouseY);
 
   /* display */
   push();
@@ -191,14 +200,35 @@ function draw() {
 
   drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"));
 
+  if (dragging) {
+    noFill();
+    stroke(0, 0, 255);
+    strokeWeight(1 / M);
+
+    //min radius circle 
+    ellipse(slingshot_center.x, slingshot_center.y, min_radius * 2, min_radius * 2);
+
+    //max radius circle
+    ellipse(slingshot_center.x, slingshot_center.y, max_radius * 2, max_radius * 2);
+
+    //draw sling
+    fill(0, 0, 0, 200);
+    noStroke();
+
+    beginShape();
+    vertex(slingshot.x3, slingshot.y3);
+    vertex(ball_x, ball_y + ball_d / 2);
+    vertex(ball_x, ball_y - ball_d / 2);
+
+    endShape(CLOSE);
+  }
+
   //red ball
   draw_circle(-playground.width / 2, metric.height + metric.ball_diameter / 2, metric.ball_diameter, "#ff0000");
 
-  //green ball
-  draw_circle(-30, metric.height + metric.red_rec_height, metric.ball_diameter, "#00ff00");
 
   //playball
-  draw_circle(ball.x, ball.y, ball.d, "#0000ff");
+  draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 
   //slingshot
   drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
@@ -209,19 +239,16 @@ function draw() {
 }
 
 function new_attempt() {
+  console.log("New attempt button was pressed!")
   if (remaining_attempts > 0) {
     remaining_attempts -= 1;
-    status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
-  }
-  else {
-    status_text = `Score: ${score} - No remaining attempts!`
   }
 }
 
 function reset_game() {
+  console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
-  status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
 }
 
 function position_buttons() {
@@ -235,7 +262,7 @@ function mouseX_to_internal(mouse_x) {
 }
 
 function mouseY_to_internal(mouse_y) {
-  let my = (mouse_y - (canvasHeight - padding)) / M;
+  let my = (canvasHeight - padding - mouse_y) / M
   return my;
 }
 

@@ -1,33 +1,36 @@
 function mousePressed() {
-  let d = dist(mouseX, mouseY, ball.x, ball.y);
-  if (d < ball.d * M / 2) {
-    dragging = true;  // Start dragging if mouse is within the ball
+  console.log("MOUSE PRESSED!")
+  let d = dist(mx, my, ball_x, ball_y);
+  if (d < ball_d) {
+    dragging = true;
   }
+  console.log(dragging)
 }
 
 function mouseDragged() {
   if (dragging) {
-    // Calculate the distance from the catapult center to the mouse
-    let dx = mouseX - slingshot_center.x
-    let dy = mouseY - slingshot_center.y
-    let distance = dist(slingshot_center.x, slingshot_center.y, mouseX, mouseY);
+    //distance mouse to slingshot
+    let distance = dist(slingshot_center.x, slingshot_center.y, mx, my);
 
-    // Limit the ball's position within the min and max radius
-    if (distance > maxRadius) {
-      distance = maxRadius;
-    } else if (distance < minRadius) {
-      distance = minRadius;
+    console.log(distance)
+
+    if (distance > max_radius) {
+      distance = max_radius;
+    } else if (distance < min_radius) {
+      distance = min_radius;
+    } else if (distance < max_radius && distance > min_radius) {
+      ball_x = mx;
+      ball_y = my;
+
     }
-
-    // Set the ball's position within the restricted circular path
-    let angle = atan2(dy, dx);
-    ballX = slingshot_center.x + cos(angle) * distance;
-    ballY = slingshot_center.y + sin(angle) * distance;
-
-    // Update the catapult angle based on the ball's position if needed
   }
 }
 
 function mouseReleased() {
-  dragging = false;  // Stop dragging when mouse is released
+  if (dragging) {
+    ball_x = slingshot_center.x;
+    ball_y = slingshot_center.y;
+  }
+
+  dragging = false;
 }
