@@ -1,7 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.3 */
-/* Datum: 27.10.2024 */
+/* Übung Nr.4 */
+/* Datum: 04.11.2024 */
 
 
 

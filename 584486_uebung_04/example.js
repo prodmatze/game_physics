@@ -1,7 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.3 */
-/* Datum: 27.10.2024 */
+/* Übung Nr.4 */
+/* Datum: 04.11.2024 */
 
 /* declarations */
 var canvasWidth = window.innerWidth;
@@ -14,14 +14,31 @@ const padding = 100;
 let score = 0;
 let remaining_attempts = 5;
 let status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
+let dt = 0;
 
 let min_radius = 30;
 let max_radius = 100;
 
 let dragging = false;
+let can_drag_ball = false;
 
+const STATE_START = 0;
+const STATE_MOVING_IN_AIR = 1;
+const STATE_MOVING_ON_PLANE = 2;
+const STATE_END_MOVEMENT = 3;
 
+let game_state = STATE_START;
 
+let ball_angle = 0;
+let distance_ball_slingshot = 0;
+let distance_ball_slingshot_x = 0;
+let distance_ball_slingshot_y = 0;
+
+let launch_velocity = 0;
+let ball_velocity_x = 0;
+let ball_velocity_y = 0;
+
+let gravity = 9.81;
 
 /* prepare program */
 function setup() {
@@ -133,18 +150,24 @@ let ball_x = slingshot.x1 - metric.slingshot_width / 2;
 let ball_y = metric.height + metric.slingshot_height;
 let ball_d = 15;
 
-var slingshot_center = {
-  x: slingshot.x1 - metric.slingshot_width / 2,
-  y: metric.height + metric.slingshot_height,
+var slingshot_metrics = {
+  center_x: slingshot.x1 - metric.slingshot_width / 2,
+  center_y: metric.height + metric.slingshot_height,
+
 }
 
 let mx;
 let my;
 
+console.log('game_state:', game_state);
+console.log('STATE_START:', STATE_START);
+console.log('STATE_MOVING_IN_AIR:', STATE_MOVING_IN_AIR);
+console.log('STATE_MOVING_ON_PLANE:', STATE_MOVING_ON_PLANE);
+console.log('STATE_END_MOVEMENT:', STATE_END_MOVEMENT);
+
 /* run program */
 function draw() {
   background(255);
-
 
   /* administration */
   fill(0);
@@ -167,6 +190,18 @@ function draw() {
   /* calculation */
   mx = mouseX_to_internal(mouseX);
   my = mouseY_to_internal(mouseY);
+
+  distance_ball_slingshot_x = slingshot_metrics.center_x - ball_x;
+  distance_ball_slingshot_y = slingshot_metrics.center_y - ball_y;
+  distance_ball_slingshot = dist(slingshot_metrics.center_x, slingshot_metrics.center_y, ball_x, ball_y);
+
+  dt = deltaTime / 1000;
+
+  //check if ball is at ground level
+  if ((ball_y - ball_d / 2 <= metric.height) && game_state == STATE_MOVING_IN_AIR) {
+    ball_y = metric.height + ball_d / 2;
+    game_state = STATE_MOVING_ON_PLANE;
+  }
 
   /* display */
   push();
@@ -197,41 +232,76 @@ function draw() {
 
   //flagpole
   drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, 5, metric.flagpole_height, "#000000");
-
+  //flag
   drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"), 1);
-
-  if (dragging) {
-    noFill();
-    stroke(0, 0, 255);
-    strokeWeight(1 / M);
-
-    //min radius circle 
-    ellipse(slingshot_center.x, slingshot_center.y, min_radius * 2, min_radius * 2);
-
-    //max radius circle
-    ellipse(slingshot_center.x, slingshot_center.y, max_radius * 2, max_radius * 2);
-
-    //draw sling
-    fill(0, 0, 0, 200);
-    noStroke();
-
-    beginShape();
-    vertex(slingshot.x3, slingshot.y3);
-    vertex(ball_x, ball_y + ball_d / 2);
-    vertex(ball_x, ball_y - ball_d / 2);
-
-    endShape(CLOSE);
-  }
 
   //red ball
   draw_circle(-playground.width / 2, metric.height + metric.ball_diameter / 2, metric.ball_diameter, "#ff0000");
-
 
   //playball
   draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 
   //slingshot
   drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
+
+  switch (game_state) {
+    case STATE_START:
+      ball_velocity = 8;
+
+
+      //draws distance indicators and sling 
+      if (dragging) {
+        noFill();
+        stroke(0, 0, 255);
+        strokeWeight(1 / M);
+
+        //min radius circle 
+        ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, min_radius * 2, min_radius * 2);
+
+        //max radius circle
+        ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, max_radius * 2, max_radius * 2);
+
+        //draw sling
+        fill(0, 0, 0, 200);
+        noStroke();
+
+        beginShape();
+        vertex(slingshot.x3, slingshot.y3);
+        vertex(ball_x, ball_y + ball_d / 2);
+        vertex(ball_x, ball_y - ball_d / 2);
+
+        endShape(CLOSE);
+
+      }
+      if (can_drag_ball) {
+        ball_x = mx;
+        ball_y = my;
+      }
+
+
+      break;
+    case STATE_MOVING_IN_AIR:
+      ball_velocity_y -= gravity * dt;
+      ball_velocity_x = launch_velocity * cos(ball_angle);
+      ball_velocity_y = launch_velocity * sin(ball_angle);
+
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
+
+
+      ;
+      break;
+    case STATE_MOVING_ON_PLANE:
+      console.log("CURRENT STATE: ", game_state);
+
+
+
+      break;
+    case STATE_END_MOVEMENT:
+
+      break;
+
+  }
   pop();
 
   draw_scene();
@@ -242,13 +312,23 @@ function new_attempt() {
   console.log("New attempt button was pressed!")
   if (remaining_attempts > 0) {
     remaining_attempts -= 1;
+    reset_ball();
+
+    game_state = STATE_START;
   }
+
 }
 
 function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
+}
+
+function reset_ball() {
+  ball_x = slingshot.x1 - metric.slingshot_width / 2;
+  ball_y = metric.height + metric.slingshot_height;
+  launch_velocity = 0;
 }
 
 function position_buttons() {
