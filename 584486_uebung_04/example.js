@@ -38,7 +38,12 @@ let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
 
-let gravity = 9.81;
+let ball_bounce = 0.8;
+let bounce_velocity_threshold = 20;
+
+let plane_friction = 0.985;
+
+let gravity = 981;
 
 /* prepare program */
 function setup() {
@@ -159,11 +164,7 @@ var slingshot_metrics = {
 let mx;
 let my;
 
-console.log('game_state:', game_state);
-console.log('STATE_START:', STATE_START);
-console.log('STATE_MOVING_IN_AIR:', STATE_MOVING_IN_AIR);
-console.log('STATE_MOVING_ON_PLANE:', STATE_MOVING_ON_PLANE);
-console.log('STATE_END_MOVEMENT:', STATE_END_MOVEMENT);
+console.log('CURRENT GAME STATE:', game_state);
 
 /* run program */
 function draw() {
@@ -196,12 +197,6 @@ function draw() {
   distance_ball_slingshot = dist(slingshot_metrics.center_x, slingshot_metrics.center_y, ball_x, ball_y);
 
   dt = deltaTime / 1000;
-
-  //check if ball is at ground level
-  if ((ball_y - ball_d / 2 <= metric.height) && game_state == STATE_MOVING_IN_AIR) {
-    ball_y = metric.height + ball_d / 2;
-    game_state = STATE_MOVING_ON_PLANE;
-  }
 
   /* display */
   push();
@@ -247,18 +242,16 @@ function draw() {
   switch (game_state) {
     case STATE_START:
       ball_velocity = 8;
-
-
       //draws distance indicators and sling 
       if (dragging) {
         noFill();
         stroke(0, 0, 255);
         strokeWeight(1 / M);
 
-        //min radius circle 
+        //draw_min radius circle 
         ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, min_radius * 2, min_radius * 2);
 
-        //max radius circle
+        //draw max radius circle
         ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, max_radius * 2, max_radius * 2);
 
         //draw sling
@@ -277,35 +270,41 @@ function draw() {
         ball_x = mx;
         ball_y = my;
       }
-
-
       break;
+
     case STATE_MOVING_IN_AIR:
       ball_velocity_y -= gravity * dt;
-      ball_velocity_x = launch_velocity * cos(ball_angle);
-      ball_velocity_y = launch_velocity * sin(ball_angle);
 
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
-
-      ;
+      //making ball bounce 
+      if (ball_y - ball_d / 2 <= metric.height) {
+        ball_y = metric.height + ball_d / 2;
+        ball_velocity_y = -ball_velocity_y * ball_bounce;
+        ball_velocity_x *= ball_bounce;
+        if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
+          ball_velocity_y = 0;
+          game_state = STATE_MOVING_ON_PLANE;
+        }
+      }
       break;
+
     case STATE_MOVING_ON_PLANE:
       console.log("CURRENT STATE: ", game_state);
-
-
-
+      if (ball_x > (-metric.right_rect_width)) {
+        ball_x += ball_velocity_x * dt;
+      }
+      ball_velocity_x *= plane_friction;
       break;
+
     case STATE_END_MOVEMENT:
 
       break;
-
   }
   pop();
 
   draw_scene();
-
 }
 
 function new_attempt() {
@@ -323,6 +322,9 @@ function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
+  reset_ball();
+
+  game_state = STATE_START;
 }
 
 function reset_ball() {

@@ -28,13 +28,24 @@ function mouseDragged() {
 }
 
 function mouseReleased() {
-  if (dragging) {
-    ball_x = slingshot_metrics.center_x;
-    ball_y = slingshot_metrics.center_y;
-  }
-  if ((game_state == STATE_START) && dragging) {
-    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 100);
+  if ((game_state == STATE_START) && dragging && can_drag_ball) {
+    distance_ball_slingshot_x = slingshot_metrics.center_x - ball_x;
+    distance_ball_slingshot_y = slingshot_metrics.center_y - ball_y;
+    distance_ball_slingshot = dist(
+      slingshot_metrics.center_x,
+      slingshot_metrics.center_y,
+      ball_x,
+      ball_y
+    );
+
     ball_angle = atan2(distance_ball_slingshot_y, distance_ball_slingshot_x);
+
+    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 800);
+
+    ball_velocity_x = launch_velocity * cos(ball_angle);
+    ball_velocity_y = launch_velocity * sin(ball_angle);
+
+
     game_state = STATE_MOVING_IN_AIR;
   }
 
