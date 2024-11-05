@@ -40,7 +40,7 @@ function mouseReleased() {
 
     ball_angle = atan2(distance_ball_slingshot_y, distance_ball_slingshot_x);
 
-    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 800);
+    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 1500);
 
     ball_velocity_x = launch_velocity * cos(ball_angle);
     ball_velocity_y = launch_velocity * sin(ball_angle);
