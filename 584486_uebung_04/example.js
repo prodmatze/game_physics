@@ -151,9 +151,15 @@ var ball = {
   y: metric.height + metric.slingshot_height + 15 / 2,
 }
 
+//playball
 let ball_x = slingshot.x1 - metric.slingshot_width / 2;
 let ball_y = metric.height + metric.slingshot_height;
 let ball_d = 15;
+
+//red ball
+let red_ball_x = -playground.width / 2;
+let red_ball_y = metric.height + metric.ball_diameter / 2;
+let red_ball_d = metric.ball_diameter;
 
 var slingshot_metrics = {
   center_x: slingshot.x1 - metric.slingshot_width / 2,
@@ -201,7 +207,6 @@ function draw() {
   /* display */
   push();
 
-
   translate(canvasWidth - padding, canvasHeight - padding);
 
   //scale entire coordinate system so i dont have to calculate M into every object
@@ -230,14 +235,14 @@ function draw() {
   //flag
   drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"), 1);
 
+  //slingshot
+  drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
+
   //red ball
-  draw_circle(-playground.width / 2, metric.height + metric.ball_diameter / 2, metric.ball_diameter, "#ff0000");
+  draw_circle(red_ball_x, red_ball_y, red_ball_d, "#ff0000");
 
   //playball
   draw_circle(ball_x, ball_y, ball_d, "#0000ff");
-
-  //slingshot
-  drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
 
   switch (game_state) {
     case STATE_START:
@@ -288,14 +293,20 @@ function draw() {
           game_state = STATE_MOVING_ON_PLANE;
         }
       }
+
+      //making ball stop at hole
+      if (ball_x < (-metric.right_rect_width)) {
+        ball_velocity_x = 0;
+      }
       break;
 
     case STATE_MOVING_ON_PLANE:
       console.log("CURRENT STATE: ", game_state);
-      if (ball_x > (-metric.right_rect_width)) {
-        ball_x += ball_velocity_x * dt;
-      }
       ball_velocity_x *= plane_friction;
+      if (ball_x < (-metric.right_rect_width)) {
+        ball_velocity_x = 0;
+        game_state = STATE_END_MOVEMENT;
+      }
       break;
 
     case STATE_END_MOVEMENT:
