@@ -38,10 +38,13 @@ let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
 
-let ball_bounce = 0.8;
-let bounce_velocity_threshold = 20;
+let red_ball_velocity_x = 0;
+let red_ball_velocity_y = 0;
 
-let plane_friction = 0.985;
+let ball_bounce = 0.8;
+let bounce_velocity_threshold = 90;
+
+let plane_friction = 0.95;
 
 let gravity = 981;
 
@@ -170,6 +173,8 @@ var slingshot_metrics = {
 let mx;
 let my;
 
+let info_panel_width = 200;
+
 console.log('CURRENT GAME STATE:', game_state);
 
 /* run program */
@@ -203,7 +208,11 @@ function draw() {
   distance_ball_slingshot = dist(slingshot_metrics.center_x, slingshot_metrics.center_y, ball_x, ball_y);
 
   dt = deltaTime / 1000;
+  ball_x += ball_velocity_x * dt;
+  ball_y += ball_velocity_y * dt;
 
+  red_ball_x += red_ball_velocity_x * dt;
+  red_ball_y += red_ball_velocity_y * dt;
   /* display */
   push();
 
@@ -228,7 +237,7 @@ function draw() {
   drawRectangle(- metric.right_rect_width / 2, metric.height, metric.red_rec_width, metric.red_rec_height, "#ff0000");
 
   //blue triangle
-  drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");
+  //drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");
 
   //flagpole
   drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, 5, metric.flagpole_height, "#000000");
@@ -244,6 +253,8 @@ function draw() {
   //playball
   draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 
+
+  console.log("CURRENT STATE:", game_state);
   switch (game_state) {
     case STATE_START:
       ball_velocity = 8;
@@ -280,23 +291,37 @@ function draw() {
     case STATE_MOVING_IN_AIR:
       ball_velocity_y -= gravity * dt;
 
-      ball_x += ball_velocity_x * dt;
-      ball_y += ball_velocity_y * dt;
-
       //making ball bounce 
-      if (ball_y - ball_d / 2 <= metric.height) {
+      if (ground_collision()) {
+        console.log("BALL BOUNCED!, VELOCITY_Y:", ball_velocity_y)
+        ball_velocity_y += gravity * dt
+
         ball_y = metric.height + ball_d / 2;
-        ball_velocity_y = -ball_velocity_y * ball_bounce;
-        ball_velocity_x *= ball_bounce;
+        ball_velocity_y = -ball_velocity_y * 0.8;
+        ball_velocity_x *= plane_friction;
         if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
           ball_velocity_y = 0;
           game_state = STATE_MOVING_ON_PLANE;
         }
       }
 
+      //making ball bounce off wall
+      if (wall_collision()) {
+        ball_x = -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width + ball_d;
+        ball_velocity_x = -ball_velocity_x * ball_bounce;
+      }
+      /*
       //making ball stop at hole
       if (ball_x < (-metric.right_rect_width)) {
         ball_velocity_x = 0;
+      }
+      */
+      if (ball_collision()) {
+        red_ball_velocity_x = ball_velocity_x * ball_bounce;
+      }
+
+      if (obstacle_collision()) {
+        ball_velocity_x = -ball_velocity_x * ball_bounce;
       }
       break;
 
@@ -315,6 +340,8 @@ function draw() {
   }
   pop();
 
+  display_info();
+
   draw_scene();
 }
 
@@ -322,7 +349,7 @@ function new_attempt() {
   console.log("New attempt button was pressed!")
   if (remaining_attempts > 0) {
     remaining_attempts -= 1;
-    reset_ball();
+    reset_balls();
 
     game_state = STATE_START;
   }
@@ -333,15 +360,23 @@ function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
-  reset_ball();
+  reset_balls();
 
   game_state = STATE_START;
 }
 
-function reset_ball() {
+function reset_balls() {
   ball_x = slingshot.x1 - metric.slingshot_width / 2;
   ball_y = metric.height + metric.slingshot_height;
   launch_velocity = 0;
+  ball_velocity_x = 0;
+  ball_velocity_y = 0;
+
+  red_ball_x = -playground.width / 2;
+  red_ball_y = metric.height + metric.ball_diameter / 2;
+  red_ball_velocity_x = 0;
+  red_ball_velocity_y = 0;
+
 }
 
 function position_buttons() {
@@ -357,6 +392,31 @@ function mouseX_to_internal(mouse_x) {
 function mouseY_to_internal(mouse_y) {
   let my = (canvasHeight - padding - mouse_y) / M
   return my;
+}
+
+function draw_info_panel_background() {
+  fill(220);
+  noStroke();
+  rect(canvasWidth - info_panel_width - padding, 0 + padding, info_panel_width, canvasHeight - padding * 4);
+}
+
+function display_info() {
+  fill(0);
+  textSize(16);
+  textAlign(CENTER, TOP);
+
+  let x = canvasWidth / 2;
+  let y = padding * 2.5;
+
+  text(`Ball Position: (${ball_x.toFixed(2)}, ${ball_y.toFixed(2)})`, x, y);
+  y += 24;
+
+  text(`Ball Velocity: (${ball_velocity_x.toFixed(2)}, ${ball_velocity_y.toFixed(2)})`, x, y);
+  y += 24;
+
+  text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);
+  y += 24;
+
 }
 
 /* isr */
