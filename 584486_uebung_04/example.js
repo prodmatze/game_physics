@@ -42,9 +42,9 @@ let red_ball_velocity_x = 0;
 let red_ball_velocity_y = 0;
 
 let ball_bounce = 0.8;
-let bounce_velocity_threshold = 20;
+let bounce_velocity_threshold = 90;
 
-let plane_friction = 0.985;
+let plane_friction = 0.95;
 
 let gravity = 981;
 
@@ -253,8 +253,8 @@ function draw() {
   //playball
   draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 
-  console.log(wall_collision());
 
+  console.log("CURRENT STATE:", game_state);
   switch (game_state) {
     case STATE_START:
       ball_velocity = 8;
@@ -293,9 +293,12 @@ function draw() {
 
       //making ball bounce 
       if (ground_collision()) {
+        console.log("BALL BOUNCED!, VELOCITY_Y:", ball_velocity_y)
+        ball_velocity_y += gravity * dt
+
         ball_y = metric.height + ball_d / 2;
-        ball_velocity_y = -ball_velocity_y * ball_bounce;
-        ball_velocity_x *= ball_bounce;
+        ball_velocity_y = -ball_velocity_y * 0.8;
+        ball_velocity_x *= plane_friction;
         if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
           ball_velocity_y = 0;
           game_state = STATE_MOVING_ON_PLANE;
