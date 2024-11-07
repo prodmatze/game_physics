@@ -57,6 +57,6 @@ The project includes these physics-based concepts:
 - **Plane Friction**: `0.95` - Applies friction when the ball moves along the ground.
 
 ## Screenshots
-**Screenshots will get shown here after completion of the project**
+**More screenshots will get shown here after completion of the project**
 ![Screenshot 1](assets/screenshots/screenshot_01.png)
 *Figure 1: Main game interface.*
