@@ -1,7 +1,7 @@
 # Game Physics Project
 
 > **Author**: Mathieu Wassmuth  
-> **Date**: November 4, 2024
+> **Date**: November, 2024
 
 ## Overview
 
@@ -25,12 +25,13 @@ To run this project locally, you need `p5.js`. Clone the repository, then open `
 ### Prerequisites
 
 - **p5.js**: [Download and install p5.js](https://p5js.org/download/)
+- ## **This is included as a .js file in the repository**
 
 ### Installation
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/your-username/game_physics.git
+   git clone https://github.com/prodmatze/game_physics.git
 2. Open `index.html` in your browser to run the game.
 
 ## Usage
@@ -42,3 +43,18 @@ To run this project locally, you need `p5.js`. Clone the repository, then open `
 - `collisions.j`: Manages collision detection for the ball, walls, ground, and obstacles.
 - `interactivity.js`: Handles mouse controls for the slingshot and launching the ball.
 - `addOns.js: Contains`: drawing functions for game elements like rectangles, triangles, and the flag.
+
+## Game Physics
+The project includes these physics-based concepts:
+- Projectile Motion: Simulates a projectile launched at an adjustable angle.
+- Friction and Bouncing: Provides realistic responses when the ball hits the ground or walls.
+- Scaling: All objects are scaled based on a cartesian coordinate system, converting real-world units to the screen display.
+- Objective: The goal is to hit the red ball and sink it into a hole to score points, similar to a basic target game
+
+## Physics Constants
+- **Gravity**: `981 cm/s²` - Controls the downward acceleration of the projectile (play_ball)
+- **Bounce Factor: `0.8` - Determines how much of the downward acceleration gets preserved after each bounce of the ball
+- ** Plane Friction**: `0.95` - Applies friction when the ball moves along the ground.
+
+## Screenshots
+**Screenshots will get shown here after completion of the project**
