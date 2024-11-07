@@ -58,5 +58,5 @@ The project includes these physics-based concepts:
 
 ## Screenshots
 **More screenshots will get shown here after completion of the project**
-![Screenshot 1](assets/screenshots/screenshot_01.png)
+![Screenshot 1](assets/screenshots/screenshot_02.png)
 *Figure 1: Main game interface.*
