@@ -39,7 +39,7 @@ To run this project locally, you need `p5.js`. Clone the repository, then open `
 - **RESET Button**: Resets the game and score.
 
 ## Code Structure
-- `example.js`: Main script handling game setup, states, and primary interactions.
+- `main.js`: Main script handling game setup, states, and primary interactions.
 - `collisions.j`: Manages collision detection for the ball, walls, ground, and obstacles.
 - `interactivity.js`: Handles mouse controls for the slingshot and launching the ball.
 - `addOns.js: Contains`: drawing functions for game elements like rectangles, triangles, and the flag.
@@ -53,8 +53,10 @@ The project includes these physics-based concepts:
 
 ## Physics Constants
 - **Gravity**: `981 cm/s²` - Controls the downward acceleration of the projectile (play_ball)
-- **Bounce Factor: `0.8` - Determines how much of the downward acceleration gets preserved after each bounce of the ball
-- ** Plane Friction**: `0.95` - Applies friction when the ball moves along the ground.
+- **Bounce Factor**: `0.8` - Determines how much of the downward acceleration gets preserved after each bounce of the ball
+- **Plane Friction**: `0.95` - Applies friction when the ball moves along the ground.
 
 ## Screenshots
 **Screenshots will get shown here after completion of the project**
+![Screenshot 1](assets/screenshots/screenshot_01.png)
+*Figure 1: Main game interface.*
