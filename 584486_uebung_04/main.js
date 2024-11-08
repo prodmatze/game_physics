@@ -292,7 +292,7 @@ function draw() {
       ball_velocity_y -= gravity * dt;
 
       //making ball bounce 
-      if (ground_collision()) {
+      if (ground_collision(ball_x, ball_y)) {
         console.log("BALL BOUNCED!, VELOCITY_Y:", ball_velocity_y)
         ball_velocity_y += gravity * dt
 
@@ -306,7 +306,7 @@ function draw() {
       }
 
       //making ball bounce off wall
-      if (wall_collision()) {
+      if (wall_collision(ball_x, ball_y)) {
         ball_x = -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width + ball_d;
         ball_velocity_x = -ball_velocity_x * ball_bounce;
       }
@@ -316,11 +316,11 @@ function draw() {
         ball_velocity_x = 0;
       }
       */
-      if (ball_collision()) {
+      if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
         red_ball_velocity_x = ball_velocity_x * ball_bounce;
       }
 
-      if (obstacle_collision()) {
+      if (obstacle_collision(ball_x, ball_y)) {
         ball_velocity_x = -ball_velocity_x * ball_bounce;
       }
       break;
@@ -340,7 +340,7 @@ function draw() {
   }
   pop();
 
-  display_info();
+  display_info(mx, my);
 
   draw_scene();
 }
@@ -400,7 +400,7 @@ function draw_info_panel_background() {
   rect(canvasWidth - info_panel_width - padding, 0 + padding, info_panel_width, canvasHeight - padding * 4);
 }
 
-function display_info() {
+function display_info(mx, my) {
   fill(0);
   textSize(16);
   textAlign(CENTER, TOP);
@@ -408,13 +408,16 @@ function display_info() {
   let x = canvasWidth / 2;
   let y = padding * 2.5;
 
-  text(`Ball Position: (${ball_x.toFixed(2)}, ${ball_y.toFixed(2)})`, x, y);
+  text(`Ball Position: (${floor(ball_x)}, ${floor(ball_y)})`, x, y);
   y += 24;
 
-  text(`Ball Velocity: (${ball_velocity_x.toFixed(2)}, ${ball_velocity_y.toFixed(2)})`, x, y);
+  text(`Ball Velocity: (${floor(ball_velocity_x)}, ${floor(ball_velocity_y)})`, x, y);
   y += 24;
 
   text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);
+  y += 24;
+
+  text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
   y += 24;
 
 }
