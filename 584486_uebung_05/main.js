@@ -8,6 +8,7 @@ var canvasWidth = window.innerWidth;
 var canvasHeight = window.innerHeight;
 
 let brick_texture;
+let boing_sound;
 
 function preload() {
   brick_texture = loadImage("./assets/images/golf_course.jpeg");
@@ -27,10 +28,10 @@ let max_radius = 100;
 let dragging = false;
 let can_drag_ball = false;
 
-const STATE_START = 0;
-const STATE_MOVING_IN_AIR = 1;
-const STATE_MOVING_ON_PLANE = 2;
-const STATE_END_MOVEMENT = 3;
+const STATE_START = "Start";
+const STATE_MOVING_IN_AIR = "Moving in Air";
+const STATE_MOVING_ON_PLANE = "Moving on Plane";
+const STATE_END_MOVEMENT = "End";
 
 let game_state = STATE_START;
 
@@ -170,8 +171,6 @@ function draw() {
   //playball
   draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 
-
-  console.log("CURRENT STATE:", game_state);
   switch (game_state) {
     case STATE_START:
       ball_velocity = 8;
@@ -245,8 +244,8 @@ function draw() {
     case STATE_MOVING_ON_PLANE:
       console.log("CURRENT STATE: ", game_state);
       ball_velocity_x *= plane_friction;
-      if (ball_x < (-metric.right_rect_width)) {
-        ball_velocity_x = 0;
+      if (ball_velocity_x < 1) {
+        ball_velocity_x = 1;
         game_state = STATE_END_MOVEMENT;
       }
       break;
@@ -329,6 +328,7 @@ function display_info(mx, my) {
   text(`Ball Position: (${floor(ball_x)}, ${floor(ball_y)})`, x, y);
   y += 24;
 
+
   text(`Ball Velocity: (${floor(ball_velocity_x)}, ${floor(ball_velocity_y)})`, x, y);
   y += 24;
 
@@ -338,6 +338,8 @@ function display_info(mx, my) {
   text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
   y += 24;
 
+  text(`Current Game State: ${game_state}`, x, y);
+  y += 24;
 }
 
 /* isr */
