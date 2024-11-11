@@ -179,10 +179,8 @@ console.log('CURRENT GAME STATE:', game_state);
 
 /* run program */
 function draw() {
-  background(255);
 
   /* administration */
-  fill(0);
 
   //position buttons
   position_buttons();
@@ -197,7 +195,6 @@ function draw() {
   textAlign(CENTER, TOP);
   textSize(32);
   text(status_text, canvasWidth / 2, padding * 2);
-
 
   /* calculation */
   mx = mouseX_to_internal(mouseX);
@@ -221,42 +218,14 @@ function draw() {
   //scale entire coordinate system so i dont have to calculate M into every object
   scale(M, -M);
 
-  //right rect
-  drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');
-
-  //left rect
-  drawRectangle(-metric.right_rect_width - metric.left_rect_width - metric.hole_width, 0, metric.left_rect_width, metric.height, '#0000ff');
-
-  //hole rec
-  drawRectangle(-metric.right_rect_width - metric.hole_width, 0, metric.hole_width, metric.hole_height, "#0000ff");
-
-  //schortstein
-  drawRectangle(-metric.right_rect_width - metric.left_rect_width - metric.hole_width, 0, metric.schornstein_width, metric.schornstein_height, "#0000ff");
-
-  //red rectangle
-  drawRectangle(- metric.right_rect_width / 2, metric.height, metric.red_rec_width, metric.red_rec_height, "#ff0000");
-
-  //blue triangle
-  //drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");
-
-  //flagpole
-  drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, 5, metric.flagpole_height, "#000000");
-  //flag
-  drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"), 1);
-
-  //slingshot
-  drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
-
-  //red ball
-  draw_circle(red_ball_x, red_ball_y, red_ball_d, "#ff0000");
-
-  //playball
-  draw_circle(ball_x, ball_y, ball_d, "#0000ff");
-
-
   console.log("CURRENT STATE:", game_state);
   switch (game_state) {
     case STATE_START:
+      background(255);
+      textAlign(CENTER, TOP);
+      textSize(32);
+      text(status_text, canvasWidth / 2, padding * 2);
+      draw_scene();
       ball_velocity = 8;
       //draws distance indicators and sling 
       if (dragging) {
@@ -289,6 +258,9 @@ function draw() {
       break;
 
     case STATE_MOVING_IN_AIR:
+      background(255, 255, 255, 40);
+
+      draw_scene();
       ball_velocity_y -= gravity * dt;
 
       //making ball bounce 
@@ -326,6 +298,9 @@ function draw() {
       break;
 
     case STATE_MOVING_ON_PLANE:
+      background(255);
+      draw_scene();
+
       console.log("CURRENT STATE: ", game_state);
       ball_velocity_x *= plane_friction;
       if (ball_x < (-metric.right_rect_width)) {
@@ -335,6 +310,9 @@ function draw() {
       break;
 
     case STATE_END_MOVEMENT:
+      background(255);
+      draw_status_text();
+      draw_scene();
 
       break;
   }
@@ -420,6 +398,8 @@ function display_info(mx, my) {
   text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
   y += 24;
 
+  text(`Current Game State: ${game_state}`, x, y);
+  y += 24;
 }
 
 /* isr */
