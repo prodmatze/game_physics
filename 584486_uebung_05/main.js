@@ -1,7 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.4 */
-/* Datum: 04.11.2024 */
+/* Übung Nr.5 */
+/* Datum: 12.11.2024 */
 
 /* declarations */
 var canvasWidth = window.innerWidth;
@@ -198,7 +198,6 @@ function draw() {
   textSize(32);
   text(status_text, canvasWidth / 2, padding * 2);
 
-
   /* calculation */
   mx = mouseX_to_internal(mouseX);
   my = mouseY_to_internal(mouseY);
@@ -221,38 +220,7 @@ function draw() {
   //scale entire coordinate system so i dont have to calculate M into every object
   scale(M, -M);
 
-  //right rect
-  drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');
-
-  //left rect
-  drawRectangle(-metric.right_rect_width - metric.left_rect_width - metric.hole_width, 0, metric.left_rect_width, metric.height, '#0000ff');
-
-  //hole rec
-  drawRectangle(-metric.right_rect_width - metric.hole_width, 0, metric.hole_width, metric.hole_height, "#0000ff");
-
-  //schortstein
-  drawRectangle(-metric.right_rect_width - metric.left_rect_width - metric.hole_width, 0, metric.schornstein_width, metric.schornstein_height, "#0000ff");
-
-  //red rectangle
-  drawRectangle(- metric.right_rect_width / 2, metric.height, metric.red_rec_width, metric.red_rec_height, "#ff0000");
-
-  //blue triangle
-  //drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");
-
-  //flagpole
-  drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, 5, metric.flagpole_height, "#000000");
-  //flag
-  drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"), 1);
-
-  //slingshot
-  drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
-
-  //red ball
-  draw_circle(red_ball_x, red_ball_y, red_ball_d, "#ff0000");
-
-  //playball
-  draw_circle(ball_x, ball_y, ball_d, "#0000ff");
-
+  draw_scene();
 
   console.log("CURRENT STATE:", game_state);
   switch (game_state) {
@@ -297,7 +265,7 @@ function draw() {
         ball_velocity_y += gravity * dt
 
         ball_y = metric.height + ball_d / 2;
-        ball_velocity_y = -ball_velocity_y * 0.8;
+        ball_velocity_y = -ball_velocity_y * ball_bounce;
         ball_velocity_x *= plane_friction;
         if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
           ball_velocity_y = 0;
@@ -342,7 +310,6 @@ function draw() {
 
   display_info(mx, my);
 
-  draw_scene();
 }
 
 function new_attempt() {

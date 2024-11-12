@@ -1,3 +1,8 @@
+/* template GTAT2 Game Technology & Interactive Systems */
+/* Autor: Mathieu Wassmuth  */
+/* Übung Nr.5 */
+/* Datum: 12.11.2024 */
+
 function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
   distance = dist(ball_0_x, ball_0_y, ball_1_x, ball_1_y);
   if (distance < ball_d) {
@@ -33,4 +38,8 @@ function obstacle_collision(ball_x, ball_y) {
   else {
     return false;
   }
+}
+
+function triangle_collision(ball_x, ball_y) {
+
 }

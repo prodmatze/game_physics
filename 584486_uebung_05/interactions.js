@@ -1,6 +1,7 @@
+/* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.4 */
-/* Datum: 04.11.2024 */
+/* Übung Nr.5 */
+/* Datum: 12.11.2024 */
 
 function mousePressed() {
   console.log("MOUSE PRESSED!")
