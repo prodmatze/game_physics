@@ -40,6 +40,34 @@ function obstacle_collision(ball_x, ball_y) {
   }
 }
 
-function triangle_collision(ball_x, ball_y) {
+function distance_to_segment(ball_x, ball_y) {
 
+  const dx = triangle_coords.x3 - triangle_coords.x1;
+  const dy = triangle_coords.y3 - triangle_coords.y1;
+
+  const t = ((ball_x - triangle_coords.x1) * dx + (ball_y - triangle_coords.y1) * dy) / (dx * dx + dy * dy);
+
+  let closestX, closestY;
+
+  if (t < 0) {
+    closestX = triangle_coords.x1;
+    closestY = triangle_coords.y1;
+  } else if (t > 1) {
+    closestX = triangle_coords.x3;
+    closestY = triangle_coords.y3;
+  } else {
+    closestX = triangle_coords.x1 + t * dx;
+    closestY = triangle_coords.y1 + t * dy;
+  }
+  return dist(ball_x, ball_y, closestX, closestY);
+}
+
+function triangle_collision(ball_x, ball_y) {
+  const distance = distance_to_segment(ball_x, ball_y)
+  if (distance <= ball_d) {
+    console.log("TRIANGLE COLLISION!")
+    return true;
+  } else {
+    return false;
+  }
 }

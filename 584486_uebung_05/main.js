@@ -222,10 +222,10 @@ function draw() {
 
   draw_scene();
 
-  console.log("CURRENT STATE:", game_state);
   switch (game_state) {
     case STATE_START:
       ball_velocity = 8;
+
       //draws distance indicators and sling 
       if (dragging) {
         noFill();
@@ -261,7 +261,6 @@ function draw() {
 
       //making ball bounce 
       if (ground_collision(ball_x, ball_y)) {
-        console.log("BALL BOUNCED!, VELOCITY_Y:", ball_velocity_y)
         ball_velocity_y += gravity * dt
 
         ball_y = metric.height + ball_d / 2;
@@ -291,10 +290,15 @@ function draw() {
       if (obstacle_collision(ball_x, ball_y)) {
         ball_velocity_x = -ball_velocity_x * ball_bounce;
       }
+
+      if (triangle_collision(ball_x, ball_y)) {
+        ball_velocity_x = -ball_velocity_x;
+        ball_velocity_y = -ball_velocity_y;
+      }
+
       break;
 
     case STATE_MOVING_ON_PLANE:
-      console.log("CURRENT STATE: ", game_state);
       ball_velocity_x *= plane_friction;
       if (ball_x < (-metric.right_rect_width)) {
         ball_velocity_x = 0;
@@ -387,6 +391,8 @@ function display_info(mx, my) {
   text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
   y += 24;
 
+  text(`Current State: ${game_state}`, x, y);
+  y += 24;
 }
 
 /* isr */
