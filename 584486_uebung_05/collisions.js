@@ -66,8 +66,48 @@ function triangle_collision(ball_x, ball_y) {
   const distance = distance_to_segment(ball_x, ball_y)
   if (distance <= ball_d) {
     console.log("TRIANGLE COLLISION!")
-    return true;
+    return true, distance;
   } else {
     return false;
   }
+}
+
+let slope_dx = triangle_coords.x3 - triangle_coords.x1;
+let slope_dy = triangle_coords.y3 - triangle_coords.y1;
+let slope_length = Math.sqrt(slope_dx * slope_dx + slope_dy * slope_dy);
+
+let slope_unit_x = slope_dx / slope_length;
+let slope_unit_y = slope_dy / slope_length;
+let normal_unit_x = -slope_unit_y;
+let normal_unit_y = slope_unit_x;
+
+let acceleration_slope = -gravity * slope_unit_y;
+
+// Compute the normal distance from the ball center to the slope
+let normal_distance = ((ball_x - x1) * normal_unit_x + (ball_y - y1) * normal_unit_y);
+
+function roll_down_slope(ball_x, ball_y) {
+  let ball_velocity_slope = ball_velocity_x * slope_unit_x + ball_velocity_y * slope_unit_y;
+
+
+  ball_velocity_slope += acceleration_slope * dt;
+
+  ball_velocity_x = ball_velocity_slope * slope_unit_x;
+  ball_velocity_y = ball_velocity_slope * slope_unit_y;
+
+  ball_x += ball_velocity_x * dt;
+  ball_y += ball_velocity_y * dt;
+
+  let t = ((ball_x - triangle_coords.x1) * slope_dx + (ball_y - triangle_coords.y1) * slope_dy) / (slope_length * slope_length);
+  if (t >= 1) {
+    // Ball has left the slope
+    game_state = STATE_MOVING_ON_PLANE;
+  } else {
+    // Adjust ball's position to be on the slope
+    ball_x = triangle_coords.x1 + t * slope_dx;
+    ball_y = triangle_coords.y1 + t * slope_dy;
+  }
+
+
+  return ball_x, ball_y;
 }

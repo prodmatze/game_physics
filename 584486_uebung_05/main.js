@@ -55,6 +55,9 @@ function setup() {
   //create and style buttons 
   reset_button = createButton('RESET');
   new_button = createButton('NEW');
+  test_triangle_button = createButton("TEST TRIANGLE");
+  style_button(test_triangle_button);
+  test_triangle_button.mousePressed(position_ball_to_triangle);
 
   reset_button.style('background-color', 'red');
   reset_button.style('color', 'white');
@@ -71,6 +74,14 @@ function setup() {
   //button interactions
   reset_button.mousePressed(reset_game);
   new_button.mousePressed(new_attempt);
+}
+
+function style_button(button) {
+  button.style('background-color', 'red');
+  button.style('color', 'white');
+  button.style('font-size', '20px');
+  button.style('padding', '15px 30px');
+  button.style('border-radius', '10px');
 }
 
 
@@ -117,9 +128,9 @@ var metric = {
 
 
 var triangle_coords = {
-  x1: -metric.right_rect_width - metric.left_rect_width - metric.hole_width,
+  x1: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width,
   y1: metric.height + metric.triangle_height,
-  x2: -metric.right_rect_width - metric.left_rect_width - metric.hole_width,
+  x2: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width,
   y2: metric.height,
   x3: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.triangle_width,
   y3: metric.height,
@@ -271,18 +282,12 @@ function draw() {
           game_state = STATE_MOVING_ON_PLANE;
         }
       }
-
       //making ball bounce off wall
       if (wall_collision(ball_x, ball_y)) {
         ball_x = -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width + ball_d;
         ball_velocity_x = -ball_velocity_x * ball_bounce;
       }
-      /*
-      //making ball stop at hole
-      if (ball_x < (-metric.right_rect_width)) {
-        ball_velocity_x = 0;
-      }
-      */
+
       if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
         red_ball_velocity_x = ball_velocity_x * ball_bounce;
       }
@@ -292,18 +297,22 @@ function draw() {
       }
 
       if (triangle_collision(ball_x, ball_y)) {
-        ball_velocity_x = -ball_velocity_x;
-        ball_velocity_y = -ball_velocity_y;
-      }
+        ball_x, ball_y = roll_down_slope(ball_x, ball_y);
+        distance_to_slope = distance_to_segment(ball_x, ball_y);
 
+        let pen_depth = ball_d / 2 - distance_to_slope;
+        ball_x += pen_depth * normal_unit_x;
+        ball_y += pen_depth * normal_unit_y;
+      }
       break;
 
     case STATE_MOVING_ON_PLANE:
-      ball_velocity_x *= plane_friction;
-      if (ball_x < (-metric.right_rect_width)) {
-        ball_velocity_x = 0;
-        game_state = STATE_END_MOVEMENT;
+      if (ground_collision(ball_x, ball_y)) {
+        ball_y = metric.height + ball_d / 2;
       }
+      ball_velocity_y = 0;
+      ball_velocity_x *= plane_friction;
+
       break;
 
     case STATE_END_MOVEMENT:
@@ -350,9 +359,16 @@ function reset_balls() {
 
 }
 
+function position_ball_to_triangle() {
+  ball_x = triangle_coords.x1 + ball_d / 2;
+  ball_y = triangle_coords.y1 + ball_d / 2;
+  game_state = STATE_MOVING_IN_AIR;
+}
+
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
+  test_triangle_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
 }
 
 function mouseX_to_internal(mouse_x) {
