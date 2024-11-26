@@ -32,38 +32,58 @@ function wall_collision(ball_x, ball_y) {
 }
 
 function obstacle_collision(ball_x, ball_y) {
-  if ((ball_x <= - metric.right_rect_width / 2 + metric.red_rec_width) && (ball_y <= metric.height + metric.red_rec_height) && (ball_x >= metric.right_rect_width / 2)) {
-    return true;
+  segment_obstacle_left = {
+    x1: obstacle.x,
+    y1: obstacle.y,
+    x2: obstacle.x,
+    y2: obstacle.y + obstacle.height,
+  };
+  segment_obstacle_right = {
+    x1: obstacle.x + obstacle.width,
+    y1: obstacle.y,
+    x2: obstacle.x + obstacle.width,
+    y2: obstacle.y + obstacle.height,
   }
-  else {
+  const distance_obstacle_left = distance_to_segment(ball_x, ball_y, segment_obstacle_left)
+  const distance_obstacle_right = distance_to_segment(ball_x, ball_y, segment_obstacle_right)
+  if (distance_obstacle_left <= ball_d || (distance_obstacle_right <= ball_d)) {
+    console.log("OBSTACLE COLLISION!")
+    return true;
+  } else {
     return false;
   }
 }
 
-function distance_to_segment(ball_x, ball_y) {
+function distance_to_segment(ball_x, ball_y, segment) {
 
-  const dx = triangle_coords.x3 - triangle_coords.x1;
-  const dy = triangle_coords.y3 - triangle_coords.y1;
+  const dx = segment.x2 - segment.x1;
+  const dy = segment.y2 - segment.y1;
 
-  const t = ((ball_x - triangle_coords.x1) * dx + (ball_y - triangle_coords.y1) * dy) / (dx * dx + dy * dy);
+  const t = ((ball_x - segment.x1) * dx + (ball_y - segment.y1) * dy) / (dx * dx + dy * dy);
 
   let closestX, closestY;
 
   if (t < 0) {
-    closestX = triangle_coords.x1;
-    closestY = triangle_coords.y1;
+    closestX = segment.x1;
+    closestY = segment.y1;
   } else if (t > 1) {
-    closestX = triangle_coords.x3;
-    closestY = triangle_coords.y3;
+    closestX = segment.x2;
+    closestY = segment.y2;
   } else {
-    closestX = triangle_coords.x1 + t * dx;
-    closestY = triangle_coords.y1 + t * dy;
+    closestX = segment.x1 + t * dx;
+    closestY = segment.y1 + t * dy;
   }
   return dist(ball_x, ball_y, closestX, closestY);
 }
 
 function triangle_collision(ball_x, ball_y) {
-  const distance = distance_to_segment(ball_x, ball_y)
+  segment = {
+    x1: triangle_coords.x1,
+    y1: triangle_coords.y1,
+    x2: triangle_coords.x3,
+    y2: triangle_coords.y3
+  }
+  const distance = distance_to_segment(ball_x, ball_y, segment)
   if (distance <= ball_d) {
     console.log("TRIANGLE COLLISION!")
     return true, distance;
@@ -82,9 +102,6 @@ let normal_unit_x = -slope_unit_y;
 let normal_unit_y = slope_unit_x;
 
 let acceleration_slope = -gravity * slope_unit_y;
-
-// Compute the normal distance from the ball center to the slope
-let normal_distance = ((ball_x - x1) * normal_unit_x + (ball_y - y1) * normal_unit_y);
 
 function roll_down_slope(ball_x, ball_y) {
   let ball_velocity_slope = ball_velocity_x * slope_unit_x + ball_velocity_y * slope_unit_y;

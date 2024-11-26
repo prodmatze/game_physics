@@ -54,6 +54,13 @@ function scale_canvas(canvas_width, canvas_height, scale_factor) {
 	return new_canvas_width, new_canvas_height;
 }
 
+let obstacle = {
+	x: - metric.right_rect_width + 100,
+	y: metric.height,
+	height: 65,
+	width: 20,
+}
+
 function draw_scene() {
 	//right rect
 	drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');
@@ -67,8 +74,8 @@ function draw_scene() {
 	//schortstein
 	drawRectangle(-metric.right_rect_width - metric.left_rect_width - metric.hole_width, 0, metric.schornstein_width, metric.schornstein_height, "#0000ff");
 
-	//red rectangle
-	drawRectangle(- metric.right_rect_width / 2, metric.height, metric.red_rec_width, metric.red_rec_height, "#ff0000");
+	//red obstacle
+	drawRectangle(obstacle.x, obstacle.y, obstacle.width, obstacle.height, "#ff0000");
 
 	//blue triangle
 	drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");

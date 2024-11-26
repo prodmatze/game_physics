@@ -171,7 +171,7 @@ let ball_y = metric.height + metric.slingshot_height;
 let ball_d = 15;
 
 //red ball
-let red_ball_x = -playground.width / 2;
+let red_ball_x = -playground.width / 2 + 100;
 let red_ball_y = metric.height + metric.ball_diameter / 2;
 let red_ball_d = metric.ball_diameter;
 
@@ -292,12 +292,19 @@ function draw() {
       }
 
       if (obstacle_collision(ball_x, ball_y)) {
-        ball_velocity_x = -ball_velocity_x * ball_bounce;
+        console.log("FICKIFICKI");
+        ball_velocity_x = -ball_velocity_x;
       }
 
       if (triangle_collision(ball_x, ball_y)) {
+        segment = {
+          x1: triangle_coords.x1,
+          y1: triangle_coords.y1,
+          x2: triangle_coords.x3,
+          y2: triangle_coords.y3
+        };
         ball_x, ball_y, ball_velocity_slope = roll_down_slope(ball_x, ball_y);
-        distance_to_slope = distance_to_segment(ball_x, ball_y);
+        distance_to_slope = distance_to_segment(ball_x, ball_y, segment);
 
         let pen_depth = ball_d / 2 - distance_to_slope;
         ball_x += pen_depth * normal_unit_x;
@@ -351,7 +358,7 @@ function reset_balls() {
   ball_velocity_x = 0;
   ball_velocity_y = 0;
 
-  red_ball_x = -playground.width / 2;
+  red_ball_x = -playground.width / 2 + 100;
   red_ball_y = metric.height + metric.ball_diameter / 2;
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;

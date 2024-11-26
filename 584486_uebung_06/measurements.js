@@ -3,12 +3,14 @@
 /* Übung Nr.6 */
 /* Datum: 25.11.2024 */
 
+import { canvas } from './main.js';
+
 const playground = {
   height: 700,  //in cm
   width: 1000,  //in cm 
 };
 
-var M = (canvasWidth - 2 * padding) / (playground.width);
+var M = (canvas.canvasWidth - 2 * padding) / (playground.width);
 var x0 = playground.width + padding;
 var y0 = padding + playground.height;
 let info_panel_width = 200;
@@ -32,9 +34,6 @@ var metric = {
   triangle_height: 70,
   triangle_width: 150,
 
-  red_rec_height: 50,
-  red_rec_width: 15,
-
   flagpole_height: 150,
 
   flag_height: 40,
@@ -48,7 +47,7 @@ var metric = {
 }
 
 
-var triangle_coords = {
+export var triangle_coords = {
   x1: -metric.right_rect_width - metric.left_rect_width - metric.hole_width,
   y1: metric.height + metric.triangle_height,
   x2: -metric.right_rect_width - metric.left_rect_width - metric.hole_width,
