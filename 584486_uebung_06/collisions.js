@@ -247,7 +247,8 @@ function check_collisions() {
   //ground collision for red_ball
   if (!check_hole_top(red_ball_x)) {
     if (ground_collision(red_ball_x, red_ball_y)) {
-      red_ball_velocity_y += gravity * dt
+      red_ball_velocity_y += gravity * dt;
+      red_ball_velocity_x *= plane_friction;
       red_ball_y = metric.height + ball_d / 2;
       red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
       if (Math.abs(red_ball_velocity_y) < bounce_velocity_threshold) {
@@ -259,14 +260,13 @@ function check_collisions() {
       red_ball_velocity_y += gravity * dt;
       red_ball_velocity_x *= plane_friction;
       red_ball_y = metric.hole_height + ball_d / 2;
-      red_ball_velocity_y = -ball_velocity_y * ball_bounce;
+      red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
       if (Math.abs(red_ball_velocity_y) < bounce_velocity_threshold) {
         red_ball_velocity_y = 0;
-        red_ball_y = metric.hole_height + red_ball_d / 2;
       }
     }
     if (check_hole_left(red_ball_x, red_ball_y)) {
-      red_ball_x = -metric.right_rect_width - metric.hole_width + red_ball_d / 2;
+      red_ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
       red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
     }
     if (check_hole_right(red_ball_x, red_ball_y)) {
@@ -294,8 +294,8 @@ function check_collisions() {
       } else if (ball_velocity_x > 0) {
         red_ball_x = ball_x + ball_d;
       }
-      red_ball_velocity_x = ball_velocity_x;
-      ball_velocity_x *= ball_bounce;
+      red_ball_velocity_x = ball_velocity_x * ball_bounce;
+      ball_velocity_x *= ball_bounce_together_factor;
     }
   } else if (abs(ball_velocity_x) < abs(red_ball_velocity_x)) {
     if (ball_collision(red_ball_x, red_ball_y, ball_x, ball_y)) {
@@ -304,8 +304,8 @@ function check_collisions() {
       } else if (red_ball_velocity_x > 0) {
         ball_x = red_ball_x + ball_d;
       }
-      ball_velocity_x = red_ball_velocity_x;
-      red_ball_velocity_x *= ball_bounce;
+      ball_velocity_x = red_ball_velocity_x * ball_bounce;
+      red_ball_velocity_x *= ball_bounce_together_factor;
     }
   }
 

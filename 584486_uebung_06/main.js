@@ -44,9 +44,10 @@ let red_ball_velocity_y = 0;
 let red_ball_is_in_hole = false;
 
 let ball_bounce = 0.75;
+let ball_bounce_together_factor = 0.5;
 let bounce_velocity_threshold = 80;
 
-let plane_friction = 0.98;
+let plane_friction = 0.999;
 
 let gravity = 981;
 
