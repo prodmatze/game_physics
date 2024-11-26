@@ -55,7 +55,7 @@ function scale_canvas(canvas_width, canvas_height, scale_factor) {
 }
 
 let obstacle = {
-	x: - metric.right_rect_width + 100,
+	x: - metric.right_rect_width / 2,
 	y: metric.height,
 	height: 65,
 	width: 20,

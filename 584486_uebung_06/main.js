@@ -37,14 +37,16 @@ let distance_ball_slingshot_y = 0;
 let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
+let play_ball_is_in_hole = false;
 
 let red_ball_velocity_x = 0;
 let red_ball_velocity_y = 0;
+let red_ball_is_in_hole = false;
 
-let ball_bounce = 0.8;
-let bounce_velocity_threshold = 90;
+let ball_bounce = 0.75;
+let bounce_velocity_threshold = 80;
 
-let plane_friction = 0.03;
+let plane_friction = 0.98;
 
 let gravity = 981;
 
@@ -58,6 +60,10 @@ function setup() {
   test_triangle_button = createButton("TEST TRIANGLE");
   style_button(test_triangle_button);
   test_triangle_button.mousePressed(position_ball_to_triangle);
+
+  test_ball_collision_button = createButton("TEST BALL COLLISION");
+  style_button(test_ball_collision_button);
+  test_ball_collision_button.mousePressed(test_ball_collision);
 
   reset_button.style('background-color', 'red');
   reset_button.style('color', 'white');
@@ -98,10 +104,10 @@ var metric = {
   height: playground.height * 0.1,
 
   //important that right rectangle, left rectange, and hole add up to 100% of playground width to make playground symetric and centered
-  right_rect_width: playground.width * 0.62,
-  left_rect_width: playground.width * 0.35,
+  right_rect_width: playground.width * 0.6,
+  left_rect_width: playground.width * 0.33,
 
-  hole_width: playground.width * 0.03,
+  hole_width: playground.width * 0.07,
   hole_height: (playground.height * 0.1) / 2,
 
   schornstein_height: playground.height * 0.5,
@@ -269,56 +275,14 @@ function draw() {
 
     case STATE_MOVING_IN_AIR:
       ball_velocity_y -= gravity * dt;
-
-      //making ball bounce 
-      if (ground_collision(ball_x, ball_y)) {
-        ball_velocity_y += gravity * dt
-
-        ball_y = metric.height + ball_d / 2;
-        ball_velocity_y = -ball_velocity_y * ball_bounce;
-        if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
-          ball_velocity_y = 0;
-          game_state = STATE_MOVING_ON_PLANE;
-        }
-      }
-      //making ball bounce off wall
-      if (wall_collision(ball_x, ball_y)) {
-        ball_x = -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width + ball_d;
-        ball_velocity_x = -ball_velocity_x * ball_bounce;
-      }
-
-      if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
-        red_ball_velocity_x = ball_velocity_x * ball_bounce;
-      }
-
-      if (obstacle_collision(ball_x, ball_y)) {
-        console.log("FICKIFICKI");
-        ball_velocity_x = -ball_velocity_x;
-      }
-
-      if (triangle_collision(ball_x, ball_y)) {
-        segment = {
-          x1: triangle_coords.x1,
-          y1: triangle_coords.y1,
-          x2: triangle_coords.x3,
-          y2: triangle_coords.y3
-        };
-        ball_x, ball_y, ball_velocity_slope = roll_down_slope(ball_x, ball_y);
-        distance_to_slope = distance_to_segment(ball_x, ball_y, segment);
-
-        let pen_depth = ball_d / 2 - distance_to_slope;
-        ball_x += pen_depth * normal_unit_x;
-        ball_y += pen_depth * normal_unit_y;
-      }
+      red_ball_velocity_y -= gravity * dt;
+      check_collisions();
       break;
 
     case STATE_MOVING_ON_PLANE:
-      if (ground_collision(ball_x, ball_y)) {
-        ball_y = metric.height + ball_d / 2;
-      }
-      ball_velocity_y = 0;
-      ball_velocity_x -= ball_velocity_x * plane_friction;
-
+      ball_velocity_y -= gravity * dt;
+      red_ball_velocity_y -= gravity * dt;
+      check_collisions();
       break;
 
     case STATE_END_MOVEMENT:
@@ -357,12 +321,13 @@ function reset_balls() {
   launch_velocity = 0;
   ball_velocity_x = 0;
   ball_velocity_y = 0;
+  play_ball_is_in_hole = false;
 
   red_ball_x = -playground.width / 2 + 100;
   red_ball_y = metric.height + metric.ball_diameter / 2;
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
-
+  red_ball_is_in_hole = false;
 }
 
 function position_ball_to_triangle() {
@@ -371,10 +336,27 @@ function position_ball_to_triangle() {
   game_state = STATE_MOVING_IN_AIR;
 }
 
+function test_ball_collision() {
+  reset_balls();
+  direction = "left";
+  game_state = STATE_MOVING_IN_AIR;
+  if (direction == "left") {
+    ball_x = -350;
+    ball_y = metric.height + ball_d / 2;
+    ball_velocity_x = -200;
+  } else if (direction == "right") {
+    ball_x = obstacle.x + obstacle.width + 10;
+    ball_y = metric.height + ball_d / 2;
+    ball_velocity_x = 200;
+
+  }
+}
+
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
   test_triangle_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
+  test_ball_collision_button.position(canvasWidth / 3 - padding, canvasHeight - padding * 0.8);
 }
 
 function mouseX_to_internal(mouse_x) {
