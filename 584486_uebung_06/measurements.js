@@ -3,14 +3,12 @@
 /* Übung Nr.6 */
 /* Datum: 25.11.2024 */
 
-import { canvas } from './main.js';
-
 const playground = {
   height: 700,  //in cm
   width: 1000,  //in cm 
 };
 
-var M = (canvas.canvasWidth - 2 * padding) / (playground.width);
+var M = (canvasWidth - 2 * padding) / (playground.width);
 var x0 = playground.width + padding;
 var y0 = padding + playground.height;
 let info_panel_width = 200;
