@@ -45,7 +45,7 @@ let red_ball_is_in_hole = false;
 
 let ball_bounce = 0.5;
 let ball_bounce_together_factor = 0.3;
-let bounce_velocity_threshold = 30;
+let bounce_velocity_threshold = 50;
 
 let plane_friction = 0.999;
 
@@ -73,7 +73,7 @@ function setup() {
   test_ball_collision_button.mousePressed(test_ball_collision);
 
   //button to reposition obstacle
-  position_obstacle_button = createButton("REPOSITION OBSTACLE");
+  position_obstacle_button = createButton("MOVE OBSTACLE");
   style_button(position_obstacle_button);
   position_obstacle_button.mousePressed(reposition_obstacle_and_set_bool);
 
@@ -357,11 +357,11 @@ function test_ball_collision() {
   if (direction == "left") {
     ball_x = -350;
     ball_y = metric.height + ball_d / 2;
-    ball_velocity_x = -200;
+    ball_velocity_x = -250;
   } else if (direction == "right") {
     ball_x = obstacle.x + obstacle.width + 10;
     ball_y = metric.height + ball_d / 2;
-    ball_velocity_x = 200;
+    ball_velocity_x = 250;
 
   }
 }
@@ -371,7 +371,7 @@ function position_buttons() {
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
   test_triangle_button.position(canvasWidth / 5, canvasHeight - padding * 0.8);
   test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
-  position_obstacle_button.position(canvasWidth / 1.5 - padding, canvasHeight - padding * 0.8)
+  position_obstacle_button.position(padding + metric.right_rect_width / 2 + metric.left_rect_width + metric.hole_width, canvasHeight / 2)
 }
 
 function mouseX_to_internal(mouse_x) {

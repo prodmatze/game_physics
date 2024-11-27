@@ -316,6 +316,7 @@ function check_collisions() {
     }
   }
 
+  /*
   //check if balls collide vertically
   if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
     if (ball_y > red_ball_y) {
@@ -326,6 +327,7 @@ function check_collisions() {
       red_ball_velocity_y = -red_ball_velocity_y * 0.2;
     }
   }
+  */
   //obstacle collision for play_ball
   if (obstacle_collision_left(ball_x, ball_y)) {
     ball_x = obstacle.x - ball_d / 2;
