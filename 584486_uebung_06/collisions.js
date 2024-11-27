@@ -174,7 +174,7 @@ function roll_down_slope_red_ball(ball_x, ball_y) {
 }
 
 function check_hole_top(ball_x) {
-  if ((ball_x - ball_d / 2 < -metric.right_rect_width) && ball_x + ball_d / 2 > -metric.right_rect_width - metric.hole_width) {
+  if ((ball_x - ball_d / 2 <= -metric.right_rect_width) && ball_x + ball_d / 2 >= -metric.right_rect_width - metric.hole_width) {
     return true;
   } else {
     return false;
