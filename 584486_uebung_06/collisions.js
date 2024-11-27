@@ -133,7 +133,7 @@ function roll_down_slope(ball_x, ball_y) {
 
   if (game_state == STATE_MOVING_IN_AIR) {
     let t = ((ball_x - triangle_coords.x1) * slope_dx + (ball_y - triangle_coords.y1) * slope_dy) / (slope_length * slope_length);
-    if (t >= 1 && abs(ball_velocity_y) < 5) {
+    if (t >= 1) {
       // Ball has left the slope
       ball_y = metric.height;
       game_state = STATE_MOVING_ON_PLANE;
@@ -257,7 +257,6 @@ function check_collisions() {
       } else {
         red_ball_velocity_x *= plane_friction;
         red_ball_velocity_y = 0;
-        game_state = STATE_MOVING_ON_PLANE;
       }
     }
   } else {
