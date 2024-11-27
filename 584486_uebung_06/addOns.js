@@ -61,6 +61,14 @@ let obstacle = {
 	width: 20,
 }
 
+function reposition_obstacle(obstacle_at_start) {
+	if (obstacle_at_start) {
+		obstacle.x = - 770;
+	} else {
+		obstacle.x = -metric.right_rect_width / 2;
+	}
+}
+
 function draw_scene() {
 	//right rect
 	drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');

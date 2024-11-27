@@ -43,13 +43,19 @@ let red_ball_velocity_x = 0;
 let red_ball_velocity_y = 0;
 let red_ball_is_in_hole = false;
 
-let ball_bounce = 0.75;
+let ball_bounce = 0.6;
 let ball_bounce_together_factor = 0.5;
 let bounce_velocity_threshold = 80;
 
 let plane_friction = 0.999;
 
 let gravity = 981;
+
+let obstacle_at_start = true;
+function reposition_obstacle_and_set_bool() {
+  reposition_obstacle(obstacle_at_start);
+  obstacle_at_start = !obstacle_at_start;
+}
 
 /* prepare program */
 function setup() {
@@ -65,6 +71,11 @@ function setup() {
   test_ball_collision_button = createButton("TEST BALL COLLISION");
   style_button(test_ball_collision_button);
   test_ball_collision_button.mousePressed(test_ball_collision);
+
+  //button to reposition obstacle
+  position_obstacle_button = createButton("REPOSITION OBSTACLE");
+  style_button(position_obstacle_button);
+  position_obstacle_button.mousePressed(reposition_obstacle_and_set_bool);
 
   reset_button.style('background-color', 'red');
   reset_button.style('color', 'white');
@@ -334,6 +345,7 @@ function reset_balls() {
 function position_ball_to_triangle() {
   ball_x = triangle_coords.x1 + ball_d / 2;
   ball_y = triangle_coords.y1 + ball_d / 2;
+  ball_velocity_y += gravity * dt;
   game_state = STATE_MOVING_IN_AIR;
 }
 
@@ -356,8 +368,9 @@ function test_ball_collision() {
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
-  test_triangle_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
-  test_ball_collision_button.position(canvasWidth / 3 - padding, canvasHeight - padding * 0.8);
+  test_triangle_button.position(canvasWidth / 5, canvasHeight - padding * 0.8);
+  test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
+  position_obstacle_button.position(canvasWidth / 1.5 - padding, canvasHeight - padding * 0.8)
 }
 
 function mouseX_to_internal(mouse_x) {

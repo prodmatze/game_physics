@@ -124,10 +124,9 @@ function roll_down_slope(ball_x, ball_y) {
   let ball_velocity_slope = ball_velocity_x * slope_unit_x + ball_velocity_y * slope_unit_y;
 
 
-  ball_velocity_slope += acceleration_slope * dt;
-
-  ball_velocity_x = ball_velocity_slope * slope_unit_x;
-  ball_velocity_y = ball_velocity_slope * slope_unit_y;
+  ball_velocity_slope += (acceleration_slope * dt);
+  ball_velocity_x = ball_velocity_slope * slope_unit_x * (plane_friction);
+  ball_velocity_y = ball_velocity_slope * slope_unit_y * (plane_friction);
 
   ball_x += ball_velocity_x * dt;
   ball_y += ball_velocity_y * dt;
@@ -152,7 +151,7 @@ function roll_down_slope(ball_x, ball_y) {
 function roll_down_slope_red_ball(ball_x, ball_y) {
   let ball_velocity_slope = red_ball_velocity_x * slope_unit_x + red_ball_velocity_y * slope_unit_y;
 
-  ball_velocity_slope += acceleration_slope * dt;
+  ball_velocity_slope += (acceleration_slope * dt);
 
   red_ball_velocity_x = ball_velocity_slope * slope_unit_x;
   red_ball_velocity_y = ball_velocity_slope * slope_unit_y;
@@ -227,6 +226,7 @@ function check_collisions() {
     }
   } else {
     if (hole_ground_collision(ball_y)) {
+      ball_velocity_y = 0;
       ball_velocity_y += gravity * dt;
       ball_velocity_x *= plane_friction;
       ball_y = metric.hole_height + ball_d / 2;
@@ -257,6 +257,7 @@ function check_collisions() {
     }
   } else {
     if (hole_ground_collision(red_ball_y)) {
+      ball_velocity_y = 0;
       red_ball_velocity_y += gravity * dt;
       red_ball_velocity_x *= plane_friction;
       red_ball_y = metric.hole_height + ball_d / 2;
