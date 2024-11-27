@@ -294,40 +294,42 @@ function check_collisions() {
     red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
   }
   //checks which ball is faster to make them collide accordingly
-  if (abs(ball_velocity_x) > abs(red_ball_velocity_x)) {
+  if (Math.abs(ball_velocity_x) > Math.abs(red_ball_velocity_x)) {
     if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
       if (ball_velocity_x < 0) {
         red_ball_x = ball_x - ball_d;
       } else if (ball_velocity_x > 0) {
         red_ball_x = ball_x + ball_d;
       }
-      red_ball_velocity_x = ball_velocity_x * ball_bounce;
-      ball_velocity_x *= ball_bounce_together_factor;
+      red_ball_velocity_x = ball_velocity_x * 0.6;
+      ball_velocity_x *= 0.4;
     }
-  } else if (abs(ball_velocity_x) < abs(red_ball_velocity_x)) {
+  } else if (Math.abs(ball_velocity_x) < Math.abs(red_ball_velocity_x)) {
     if (ball_collision(red_ball_x, red_ball_y, ball_x, ball_y)) {
       if (red_ball_velocity_x < 0) {
         ball_x = red_ball_x - ball_d;
       } else if (red_ball_velocity_x > 0) {
         ball_x = red_ball_x + ball_d;
       }
-      ball_velocity_x = red_ball_velocity_x * ball_bounce;
-      red_ball_velocity_x *= ball_bounce_together_factor;
+      ball_velocity_x = red_ball_velocity_x * 0.6;
+      red_ball_velocity_x *= 0.4;
     }
   }
+
 
   /*
   //check if balls collide vertically
   if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
-    if (ball_y > red_ball_y) {
+    if (ball_y - ball_d > red_ball_y + ball_d) {
       ball_y = red_ball_y + ball_d;
-      ball_velocity_y = -ball_velocity_y * 0.2;
-    } else if (red_ball_y > ball_velocity_y) {
+      //ball_velocity_y = -ball_velocity_y * 0.2;
+    } else if (red_ball_y - ball_d > ball_velocity_y + ball_d) {
       red_ball_y = ball_y + ball_d;
-      red_ball_velocity_y = -red_ball_velocity_y * 0.2;
+      //red_ball_velocity_y = -red_ball_velocity_y * 0.2;
     }
   }
   */
+
   //obstacle collision for play_ball
   if (obstacle_collision_left(ball_x, ball_y)) {
     ball_x = obstacle.x - ball_d / 2;

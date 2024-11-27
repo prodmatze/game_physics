@@ -43,9 +43,9 @@ let red_ball_velocity_x = 0;
 let red_ball_velocity_y = 0;
 let red_ball_is_in_hole = false;
 
-let ball_bounce = 0.5;
+let ball_bounce = 0.6;
 let ball_bounce_together_factor = 0.3;
-let bounce_velocity_threshold = 50;
+let bounce_velocity_threshold = 90;
 
 let plane_friction = 0.999;
 
