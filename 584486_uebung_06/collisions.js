@@ -215,6 +215,7 @@ function check_collisions() {
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
     if (ground_collision(ball_x, ball_y)) {
+      game_state = STATE_MOVING_ON_PLANE;
       if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
         ball_velocity_y += gravity * dt;
         ball_y = metric.height + ball_d / 2;
@@ -222,13 +223,13 @@ function check_collisions() {
       } else {
         ball_velocity_x *= plane_friction;
         ball_velocity_y = 0;
-        game_state = STATE_MOVING_ON_PLANE;
       }
     }
   } else {
     console.log("PLAYBALL IS OVER HOLE");
     if (hole_ground_collision(ball_y)) {
       if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
+        game_state = STATE_MOVING_ON_PLANE;
         console.log("PLAYBALL BALL GROUND COLLISION AT: ", Math.abs(ball_velocity_y))
         ball_velocity_y = -ball_velocity_y * ball_bounce;
         ball_velocity_y += gravity * dt;

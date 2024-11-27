@@ -47,7 +47,7 @@ let ball_bounce = 0.6;
 let ball_bounce_together_factor = 0.3;
 let bounce_velocity_threshold = 90;
 
-let plane_friction = 0.999;
+let plane_friction = 0.99;
 
 let gravity = 981;
 
