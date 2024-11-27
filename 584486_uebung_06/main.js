@@ -43,9 +43,9 @@ let red_ball_velocity_x = 0;
 let red_ball_velocity_y = 0;
 let red_ball_is_in_hole = false;
 
-let ball_bounce = 0.6;
-let ball_bounce_together_factor = 0.5;
-let bounce_velocity_threshold = 80;
+let ball_bounce = 0.5;
+let ball_bounce_together_factor = 0.3;
+let bounce_velocity_threshold = 30;
 
 let plane_friction = 0.999;
 
@@ -343,6 +343,7 @@ function reset_balls() {
 }
 
 function position_ball_to_triangle() {
+  reset_balls();
   ball_x = triangle_coords.x1 + ball_d / 2;
   ball_y = triangle_coords.y1 + ball_d / 2;
   ball_velocity_y += gravity * dt;
@@ -400,7 +401,10 @@ function display_info(mx, my) {
   text(`Ball Position: (${floor(ball_x)}, ${floor(ball_y)})`, x, y);
   y += 24;
 
-  text(`Ball Velocity: (${floor(ball_velocity_x)}, ${floor(ball_velocity_y)})`, x, y);
+  text(`BLUE Ball Velocity: (${floor(ball_velocity_x)}, ${floor(ball_velocity_y)})`, x, y);
+  y += 24;
+
+  text(`RED Ball Velocity: (${floor(red_ball_velocity_x)}, ${floor(red_ball_velocity_y)})`, x, y);
   y += 24;
 
   text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);

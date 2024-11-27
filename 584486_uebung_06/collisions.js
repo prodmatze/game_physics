@@ -215,23 +215,26 @@ function check_collisions() {
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
     if (ground_collision(ball_x, ball_y)) {
-      ball_velocity_y += gravity * dt;
-      ball_velocity_x *= plane_friction;
-      ball_y = metric.height + ball_d / 2;
-      ball_velocity_y = -ball_velocity_y * ball_bounce;
-      if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
+      if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
+        ball_velocity_y += gravity * dt;
+        ball_velocity_x *= plane_friction;
+        ball_y = metric.height + ball_d / 2;
+        ball_velocity_y = -ball_velocity_y * ball_bounce;
+      } else {
         ball_velocity_y = 0;
         game_state = STATE_MOVING_ON_PLANE;
       }
     }
   } else {
+    console.log("PLAYBALL IS OVER HOLE");
     if (hole_ground_collision(ball_y)) {
-      ball_velocity_y = 0;
-      ball_velocity_y += gravity * dt;
-      ball_velocity_x *= plane_friction;
-      ball_y = metric.hole_height + ball_d / 2;
-      ball_velocity_y = -ball_velocity_y * ball_bounce;
-      if (Math.abs(ball_velocity_y) < bounce_velocity_threshold) {
+      if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
+        console.log("PLAYBALL BALL GROUND COLLISION AT: ", Math.abs(ball_velocity_y))
+        ball_velocity_y = -ball_velocity_y * ball_bounce;
+        ball_velocity_y += gravity * dt;
+        ball_velocity_x *= plane_friction;
+      } else {
+        ball_y = metric.hole_height + ball_d / 2;
         ball_velocity_y = 0;
       }
     }
@@ -247,22 +250,25 @@ function check_collisions() {
   //ground collision for red_ball
   if (!check_hole_top(red_ball_x)) {
     if (ground_collision(red_ball_x, red_ball_y)) {
-      red_ball_velocity_y += gravity * dt;
-      red_ball_velocity_x *= plane_friction;
-      red_ball_y = metric.height + ball_d / 2;
-      red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-      if (Math.abs(red_ball_velocity_y) < bounce_velocity_threshold) {
+      if (Math.abs(red_ball_velocity_y) >= bounce_velocity_threshold) {
+        red_ball_velocity_y += gravity * dt;
+        red_ball_velocity_x *= plane_friction;
+        red_ball_y = metric.height + ball_d / 2;
+        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
+      } else {
         red_ball_velocity_y = 0;
+        game_state = STATE_MOVING_ON_PLANE;
       }
     }
   } else {
     if (hole_ground_collision(red_ball_y)) {
-      ball_velocity_y = 0;
-      red_ball_velocity_y += gravity * dt;
-      red_ball_velocity_x *= plane_friction;
-      red_ball_y = metric.hole_height + ball_d / 2;
-      red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-      if (Math.abs(red_ball_velocity_y) < bounce_velocity_threshold) {
+      if (Math.abs(red_ball_velocity_y) >= bounce_velocity_threshold) {
+        console.log("RED BALL GROUND COLLISION AT: ", Math.abs(red_ball_velocity_y))
+        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
+        red_ball_velocity_y += gravity * dt;
+        red_ball_velocity_x *= plane_friction;
+      } else {
+        red_ball_y = metric.hole_height + ball_d / 2;
         red_ball_velocity_y = 0;
       }
     }
