@@ -345,7 +345,7 @@ function reset_balls() {
 function position_ball_to_triangle() {
   reset_balls();
   ball_x = triangle_coords.x1 + ball_d / 2;
-  ball_y = triangle_coords.y1 + ball_d / 2;
+  ball_y = triangle_coords.y1 + ball_d / 5;
   ball_velocity_y += gravity * dt;
   game_state = STATE_MOVING_IN_AIR;
 }
