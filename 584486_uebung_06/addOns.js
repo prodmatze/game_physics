@@ -57,8 +57,8 @@ function scale_canvas(canvas_width, canvas_height, scale_factor) {
 let obstacle = {
 	x: - metric.right_rect_width / 2,
 	y: metric.height,
-	height: 65,
-	width: 20,
+	height: 100,
+	width: 15,
 }
 
 function reposition_obstacle(obstacle_at_start) {
