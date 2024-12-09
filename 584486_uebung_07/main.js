@@ -207,7 +207,6 @@ let ball_d = 15;
 let ball_d_m = ball_d / 100;
 let ball_cross_section_a = Math.PI * (ball_d_m / 2) * (ball_d_m / 2);
 
-
 //red ball
 let red_ball_x = -playground.width / 2 + 100;
 let red_ball_y = metric.height + metric.ball_diameter / 2;
@@ -216,7 +215,6 @@ let red_ball_d = metric.ball_diameter;
 var slingshot_metrics = {
   center_x: slingshot.x1 - metric.slingshot_width / 2,
   center_y: metric.height + metric.slingshot_height,
-
 }
 
 let mx;
@@ -309,7 +307,7 @@ function draw() {
       //divide velocity to get meteres/second
       let drag = calculate_drag(ball_velocity_x / 100, ball_velocity_y / 100, c_w, density_air, ball_mass, ball_cross_section_a)
 
-      let ball_acceleration_x = drag.ax;
+      let ball_acceleration_x = drag.ax - wind_speed;
       let ball_acceleration_y = drag.ay - gravity;
 
       ball_velocity_x += ball_acceleration_x * dt;
@@ -442,6 +440,9 @@ function display_info(mx, my) {
   y += 24;
 
   text(`Current State: ${game_state}`, x, y);
+  y += 24;
+
+  text(`Wind Speed: ${wind_speed}`, x, y);
   y += 24;
 }
 
