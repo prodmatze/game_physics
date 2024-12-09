@@ -61,6 +61,11 @@ let c_w = 0.45
 //dichte luft
 let density_air = 1.3;
 
+//wind-speed
+let wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
+console.log(wind_speed)
+
+
 let obstacle_at_start = true;
 function reposition_obstacle_and_set_bool() {
   reposition_obstacle(obstacle_at_start);
@@ -142,7 +147,7 @@ var metric = {
   red_rec_width: 15,
 
   flagpole_height: 150,
-
+  flagpole_width: 5,
 
   flag_height: 40,
   flag_width: 65,
@@ -170,9 +175,9 @@ var flag_pole_coords = {
 }
 
 var flag_coords = {
-  x1: flag_pole_coords.x1,
+  x1: flag_pole_coords.x1 + metric.flagpole_width / 2,
   y1: flag_pole_coords.y1 + metric.flagpole_height,
-  x2: flag_pole_coords.x1,
+  x2: flag_pole_coords.x1 + metric.flagpole_width / 2,
   y2: flag_pole_coords.y1 + metric.flagpole_height - metric.flag_height,
   x3: flag_pole_coords.x1 - metric.flag_width,
   y3: flag_pole_coords.y1 + metric.flagpole_height - metric.flag_height / 2,
@@ -197,9 +202,9 @@ var ball = {
 let ball_x = slingshot.x1 - metric.slingshot_width / 2;
 let ball_y = metric.height + metric.slingshot_height;
 let ball_d = 15;
+
 //recalc to metric
 let ball_d_m = ball_d / 100;
-
 let ball_cross_section_a = Math.PI * (ball_d_m / 2) * (ball_d_m / 2);
 
 
@@ -264,7 +269,7 @@ function draw() {
   //scale entire coordinate system so i dont have to calculate M into every object
   scale(M, -M);
 
-  draw_scene();
+  draw_scene(wind_speed);
 
   switch (game_state) {
     case STATE_START:
@@ -301,14 +306,14 @@ function draw() {
       break;
 
     case STATE_MOVING_IN_AIR:
-      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a)
+      //divide velocity to get meteres/second
+      let drag = calculate_drag(ball_velocity_x / 100, ball_velocity_y / 100, c_w, density_air, ball_mass, ball_cross_section_a)
 
       let ball_acceleration_x = drag.ax;
-      let ball_acceleration_y = drag.ay - 9.81;
+      let ball_acceleration_y = drag.ay - gravity;
 
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
-
 
       red_ball_velocity_y -= gravity * dt;
       check_collisions();

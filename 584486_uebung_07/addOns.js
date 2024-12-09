@@ -69,7 +69,7 @@ function reposition_obstacle(obstacle_at_start) {
 	}
 }
 
-function draw_scene() {
+function draw_scene(wind_speed) {
 	//right rect
 	drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');
 
@@ -89,9 +89,9 @@ function draw_scene() {
 	drawTriangle(triangle_coords.x1, triangle_coords.y1, triangle_coords.x2, triangle_coords.y2, triangle_coords.x3, triangle_coords.y3, "#0000ff");
 
 	//flagpole
-	drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, 5, metric.flagpole_height, "#000000");
+	drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, metric.flagpole_width, metric.flagpole_height, "#000000");
 	//flag
-	drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x3, flag_coords.y3, ("#ffff00"), 1);
+	drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x2 + wind_speed * 5, flag_coords.y3, ("#ffff00"), 1);
 
 	//slingshot
 	drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
