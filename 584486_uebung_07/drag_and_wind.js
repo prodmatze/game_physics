@@ -31,6 +31,7 @@ function calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball
 
 }
 
+
 function get_random_wind_speed(min, max) {
   let wind_speed = (Math.floor(Math.random() * (max - min + 1)) + min)
   return wind_speed;

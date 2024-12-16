@@ -62,7 +62,9 @@ let c_w = 0.45
 let density_air = 1.3;
 
 //wind-speed
+//errechnet einmal pro spiel eine zufällige windgeschwindigkeit zwischen -25 und +25 m/s aus
 let wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
+let wind_speed_cm_sec = wind_speed * 100
 console.log(wind_speed)
 
 
@@ -304,6 +306,7 @@ function draw() {
       break;
 
     case STATE_MOVING_IN_AIR:
+      //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
       //divide velocity to get meteres/second
       let drag = calculate_drag(ball_velocity_x / 100, ball_velocity_y / 100, c_w, density_air, ball_mass, ball_cross_section_a)
 
@@ -320,6 +323,9 @@ function draw() {
     case STATE_MOVING_ON_PLANE:
       ball_velocity_y -= gravity * dt;
       red_ball_velocity_y -= gravity * dt;
+
+      ball_velocity_x -= wind_speed * dt;
+      red_ball_velocity_x -= wind_speed * dt;
       check_collisions();
       break;
 
@@ -442,7 +448,7 @@ function display_info(mx, my) {
   text(`Current State: ${game_state}`, x, y);
   y += 24;
 
-  text(`Wind Speed: ${wind_speed}`, x, y);
+  text(`Wind Speed: ${wind_speed} m/s`, x, y);
   y += 24;
 }
 
