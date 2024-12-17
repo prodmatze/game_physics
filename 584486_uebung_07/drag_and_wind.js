@@ -3,6 +3,8 @@
 /* Übung Nr.7 */
 /* Datum: 09.12.2024 */
 
+//c_w = widerstandsbeiwert
+//Fdrag = 1/2 * c_w * density_air * cross_section_a * v^2
 function calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, cross_section_a) {
 
   //insgesamtgeschwindigkeit berechnen
