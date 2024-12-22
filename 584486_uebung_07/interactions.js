@@ -44,7 +44,7 @@ function mouseDragged() {
 function mouseReleased() {
   if ((game_state == STATE_START) && dragging && can_drag_ball) {
 
-    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 1200);
+    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 12);
 
     ball_velocity_x = launch_velocity * cos(ball_angle);
     ball_velocity_y = launch_velocity * sin(ball_angle);

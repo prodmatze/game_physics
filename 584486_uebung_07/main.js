@@ -16,8 +16,8 @@ let remaining_attempts = 5;
 let status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
 let dt = 0;
 
-let min_radius = 30;
-let max_radius = 100;
+let min_radius = 0.3;
+let max_radius = 1;
 
 let dragging = false;
 let can_drag_ball = false;
@@ -45,11 +45,11 @@ let red_ball_is_in_hole = false;
 
 let ball_bounce = 0.6;
 let ball_bounce_together_factor = 0.3;
-let bounce_velocity_threshold = 100;
+let bounce_velocity_threshold = 1;
 
 let plane_friction = 0.999;
 
-let gravity = 981;
+let gravity = 9.81;
 
 //parameters for drag and wind
 //masse des balls in kg
@@ -64,9 +64,6 @@ let density_air = 1.3;
 //wind-speed
 //errechnet einmal pro spiel eine zufällige windgeschwindigkeit zwischen -25 und +25 m/s aus
 let wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
-let wind_speed_cm_sec = wind_speed * 100
-console.log(wind_speed)
-
 
 let obstacle_at_start = true;
 function reposition_obstacle_and_set_bool() {
@@ -121,8 +118,8 @@ function style_button(button) {
 
 
 const playground = {
-  height: 700,  //in cm
-  width: 1000,  //in cm 
+  height: 7,  //in m
+  width: 10,  //in m
 };
 
 var M = (canvasWidth - 2 * padding) / (playground.width);
@@ -140,25 +137,25 @@ var metric = {
   hole_height: (playground.height * 0.1) / 2,
 
   schornstein_height: playground.height * 0.5,
-  schornstein_width: 20,
+  schornstein_width: 0.2,
 
-  triangle_height: 70,
-  triangle_width: 150,
+  triangle_height: 0.7,
+  triangle_width: 1.5,
 
-  red_rec_height: 50,
-  red_rec_width: 15,
+  red_rec_height: 0.5,
+  red_rec_width: 0.15,
 
-  flagpole_height: 150,
-  flagpole_width: 5,
+  flagpole_height: 1.5,
+  flagpole_width: 0.05,
 
-  flag_height: 40,
-  flag_width: 65,
+  flag_height: 0.4,
+  flag_width: 0.65,
 
-  ball_diameter: 15,
+  ball_diameter: 0.15,
 
-  slingshot_pos_x: 100,
-  slingshot_height: 50,
-  slingshot_width: 15,
+  slingshot_pos_x: 1,
+  slingshot_height: 0.5,
+  slingshot_width: 0.15,
 }
 
 
@@ -172,7 +169,7 @@ var triangle_coords = {
 }
 
 var flag_pole_coords = {
-  x1: - metric.right_rect_width - metric.hole_width - 30,
+  x1: - metric.right_rect_width - metric.hole_width - 0.3,
   y1: metric.height,
 }
 
@@ -195,7 +192,7 @@ var slingshot = {
 }
 
 var ball = {
-  d: 15,
+  d: 0.15,
   x: slingshot.x1 - metric.slingshot_width / 2,
   y: metric.height + metric.slingshot_height + 15 / 2,
 }
@@ -203,14 +200,13 @@ var ball = {
 //playball
 let ball_x = slingshot.x1 - metric.slingshot_width / 2;
 let ball_y = metric.height + metric.slingshot_height;
-let ball_d = 15;
+let ball_d = 0.15;
 
 //recalc to metric
-let ball_d_m = ball_d / 100;
-let ball_cross_section_a = Math.PI * (ball_d_m / 2) * (ball_d_m / 2);
+let ball_cross_section_a = Math.PI * (ball_d / 2) * (ball_d / 2);
 
 //red ball
-let red_ball_x = -playground.width / 2 + 100;
+let red_ball_x = -playground.width / 2 + 1;
 let red_ball_y = metric.height + metric.ball_diameter / 2;
 let red_ball_d = metric.ball_diameter;
 
@@ -308,7 +304,7 @@ function draw() {
     case STATE_MOVING_IN_AIR:
       //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
       //divide velocity to get meteres/second
-      let drag = calculate_drag(ball_velocity_x / 100, ball_velocity_y / 100, c_w, density_air, ball_mass, ball_cross_section_a)
+      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a)
 
       let ball_acceleration_x = drag.ax - wind_speed;
       let ball_acceleration_y = drag.ay - gravity;
@@ -367,7 +363,7 @@ function reset_balls() {
   ball_velocity_y = 0;
   play_ball_is_in_hole = false;
 
-  red_ball_x = -playground.width / 2 + 100;
+  red_ball_x = -playground.width / 2 + 1;
   red_ball_y = metric.height + metric.ball_diameter / 2;
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
@@ -387,13 +383,13 @@ function test_ball_collision() {
   direction = "left";
   game_state = STATE_MOVING_IN_AIR;
   if (direction == "left") {
-    ball_x = -350;
+    ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
-    ball_velocity_x = -250;
+    ball_velocity_x = -2.5;
   } else if (direction == "right") {
-    ball_x = obstacle.x + obstacle.width + 10;
+    ball_x = obstacle.x + obstacle.width + 0.1;
     ball_y = metric.height + ball_d / 2;
-    ball_velocity_x = 250;
+    ball_velocity_x = 2.5;
 
   }
 }

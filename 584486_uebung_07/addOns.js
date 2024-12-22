@@ -22,8 +22,8 @@ function draw_flagpole() {
 	noStroke();
 	beginShape();
 	vertex(0 + metric.length * scale, 0 + canvasHeight - 10);
-	vertex(100, 50);
-	vertex(100, 200);
+	vertex(1, 0.5);
+	vertex(1, 2);
 
 	endShape();
 }
@@ -36,7 +36,8 @@ function drawTriangle(x1, y1, x2, y2, x3, y3, c) {
 
 function drawFlag(x1, y1, x2, y2, x3, y3, c, s) {
 	fill(c);
-	stroke(s);
+	strokeWeight(0.01);
+	stroke(1);
 	triangle(x1, y1, x2, y2, x3, y3);
 }
 
@@ -57,19 +58,22 @@ function scale_canvas(canvas_width, canvas_height, scale_factor) {
 let obstacle = {
 	x: - metric.right_rect_width / 2,
 	y: metric.height,
-	height: 100,
-	width: 15,
+	height: 1,
+	width: 0.15,
 }
 
 function reposition_obstacle(obstacle_at_start) {
 	if (obstacle_at_start) {
-		obstacle.x = - 770;
+		obstacle.x = - 7.7;
 	} else {
 		obstacle.x = -metric.right_rect_width / 2;
 	}
 }
 
 function draw_scene(wind_speed) {
+
+
+	let wind_speed_map = map(wind_speed, -25, 25, -1, 1);
 	//right rect
 	drawRectangle(-metric.right_rect_width, 0, metric.right_rect_width, metric.height, '#0000ff');
 
@@ -91,7 +95,7 @@ function draw_scene(wind_speed) {
 	//flagpole
 	drawRectangle(flag_pole_coords.x1, flag_pole_coords.y1, metric.flagpole_width, metric.flagpole_height, "#000000");
 	//flag
-	drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x2 - wind_speed * 5, flag_coords.y3, ("#ffff00"), 1);
+	drawFlag(flag_coords.x1, flag_coords.y1, flag_coords.x2, flag_coords.y2, flag_coords.x2 - wind_speed_map, flag_coords.y3, ("#00ffff"), 1);
 
 	//slingshot
 	drawTriangle(slingshot.x1, slingshot.y1, slingshot.x2, slingshot.y2, slingshot.x3, slingshot.y3, "#00ff00");
