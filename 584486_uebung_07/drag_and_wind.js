@@ -5,10 +5,12 @@
 
 //c_w = widerstandsbeiwert
 //Fdrag = 1/2 * c_w * density_air * cross_section_a * v^2
-function calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, cross_section_a) {
+function calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, cross_section_a, wind_speed) {
 
+  //calculate velocity relative to the air (add wind_speed since positive wind_speed goes in negative x direction)
+  let relative_velocity_x = ball_velocity_x + wind_speed
   //insgesamtgeschwindigkeit berechnen
-  let v = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y);
+  let v = Math.sqrt(relative_velocity_x * relative_velocity_x + ball_velocity_y * ball_velocity_y);
 
   if (v === 0) {
     return { ax: 0, ay: 0 };

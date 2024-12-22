@@ -303,10 +303,9 @@ function draw() {
 
     case STATE_MOVING_IN_AIR:
       //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
-      //divide velocity to get meteres/second
-      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a)
+      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
-      let ball_acceleration_x = drag.ax - wind_speed;
+      let ball_acceleration_x = drag.ax;
       let ball_acceleration_y = drag.ay - gravity;
 
       ball_velocity_x += ball_acceleration_x * dt;
@@ -320,8 +319,6 @@ function draw() {
       ball_velocity_y -= gravity * dt;
       red_ball_velocity_y -= gravity * dt;
 
-      ball_velocity_x -= wind_speed * dt;
-      red_ball_velocity_x -= wind_speed * dt;
       check_collisions();
       break;
 
