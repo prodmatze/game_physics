@@ -53,17 +53,23 @@ let gravity = 9.81;
 
 //parameters for drag and wind
 //masse des balls in kg
-let ball_mass = 0.05;
+const ball_mass = 0.05;
 
 //luftwiderstandsbeiwert für kugel
-let c_w = 0.45
+const c_w = 0.45
 
 //dichte luft
-let density_air = 1.3;
+const density_air = 1.3;
 
 //wind-speed
 //errechnet einmal pro spiel eine zufällige windgeschwindigkeit zwischen -25 und +25 m/s aus
-let wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
+const wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
+
+const spring_constants = {
+  n: 50,
+  l_0: 0.25,
+  r_m: 0.8
+}
 
 let obstacle_at_start = true;
 function reposition_obstacle_and_set_bool() {

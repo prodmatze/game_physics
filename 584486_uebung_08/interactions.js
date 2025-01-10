@@ -43,8 +43,17 @@ function mouseDragged() {
 
 function mouseReleased() {
   if ((game_state == STATE_START) && dragging && can_drag_ball) {
+    //calculate spring forces + acceleration only once when mouse is released
+    //Energieerhaltung:
+    //Potentielle energie der Feder = 1/2 * (n * displacement^2)
+    //wird beim loslassen in kinetische Energie des Balles umgewandelt = 1/2 * (m * v^2)
+    // - > Beide Formeln gleichsetzen und nach v auflösen um die Geschwindigkeit des Balles nach dem Loslassen zu erhalten:
+    // v^2 = (n*displacement^2)/m
 
-    launch_velocity = map(distance_ball_slingshot, 0, max_radius, 0, 12);
+    let spring_displacement = distance_ball_slingshot - spring_constants.l_0;
+    let spring_force = spring_constants.n * spring_displacement;
+
+    launch_velocity = Math.sqrt((spring_constants.n * Math.pow(spring_displacement, 2)) / ball_mass);
 
     ball_velocity_x = launch_velocity * cos(ball_angle);
     ball_velocity_y = launch_velocity * sin(ball_angle);
@@ -55,6 +64,4 @@ function mouseReleased() {
 
   dragging = false;
   can_drag_ball = false;
-
-
 }
