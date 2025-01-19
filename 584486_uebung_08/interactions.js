@@ -51,13 +51,13 @@ function mouseReleased() {
     // v^2 = (n*displacement^2)/m
 
     let spring_displacement = distance_ball_slingshot - spring_constants.l_0;
+
+    //dont really nead spring force, but i calculate it regardless
     let spring_force = spring_constants.n * spring_displacement;
 
     launch_velocity = Math.sqrt((spring_constants.n * Math.pow(spring_displacement, 2)) / ball_mass);
-
     ball_velocity_x = launch_velocity * cos(ball_angle);
     ball_velocity_y = launch_velocity * sin(ball_angle);
-
 
     game_state = STATE_MOVING_IN_AIR;
   }
