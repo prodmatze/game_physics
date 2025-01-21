@@ -23,6 +23,7 @@ let dragging = false;
 let can_drag_ball = false;
 
 const STATE_START = "Start";
+const STATE_ON_CATAPULT = "On Catapult"
 const STATE_MOVING_IN_AIR = "Moving in Air";
 const STATE_MOVING_ON_PLANE = "Moving on Plane";
 const STATE_END_MOVEMENT = "End";
@@ -33,6 +34,9 @@ let ball_angle = 0;
 let distance_ball_slingshot = 0;
 let distance_ball_slingshot_x = 0;
 let distance_ball_slingshot_y = 0;
+
+let spring_discplacement = 0;
+let sring_force = 0;
 
 let launch_velocity = 0;
 let ball_velocity_x = 0;
@@ -68,7 +72,7 @@ const wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
 const spring_constants = {
   n: 50,
   l_0: 0.25,
-  r_m: 0.8
+  r_m: 0.8,
 }
 
 let obstacle_at_start = true;
@@ -299,12 +303,40 @@ function draw() {
         vertex(ball_x, ball_y - ball_d / 2);
 
         endShape(CLOSE);
+        let angle_of_attack = atan2(ball_y - slingshot_metrics.center_y, ball_x - slingshot_metrics.center_x)
+        console.log(angle_of_attack)
 
       }
       if (can_drag_ball) {
         ball_x = mx;
         ball_y = my;
       }
+      break;
+
+    case STATE_ON_CATAPULT:
+
+      distance_ball_slingshot = dist(
+        slingshot_metrics.center_x,
+        slingshot_metrics.center_y,
+        ball_x,
+        ball_y
+      );
+      spring_discplacement = distance_ball_slingshot - spring_constants.l_0;
+      //could implement if statement here to save computation (only calc spring_force when displacement is in range)
+      let angle_of_attack = atan2(ball_y - slingshot_metrics.center_y, ball_x - slingshot_metrics.center_x)
+
+      spring_force = spring_constants.n * spring_discplacement
+
+      let spring_force_x = spring_force * cos(angle_of_attack) + 0.8 * ball_velocity_x;
+      let spring_force_y = spring_force * sin(angle_of_attack) + 0.8 * ball_velocity_y;
+
+      ball_velocity_x -= spring_force_x * dt / ball_mass
+      ball_velocity_y -= spring_force_y * dt / ball_mass
+
+      if (spring_discplacement <= 0) {
+        game_state = STATE_MOVING_IN_AIR;
+      }
+
       break;
 
     case STATE_MOVING_IN_AIR:

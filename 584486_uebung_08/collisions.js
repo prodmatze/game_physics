@@ -214,7 +214,7 @@ function check_collisions() {
 
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
-    if (ground_collision(ball_x, ball_y)) {
+    if (ground_collision(ball_x, ball_y) && game_state != STATE_ON_CATAPULT) {
       game_state = STATE_MOVING_ON_PLANE;
       if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
         ball_velocity_y += gravity * dt;
