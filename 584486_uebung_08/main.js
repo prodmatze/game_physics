@@ -35,7 +35,7 @@ let distance_ball_slingshot = 0;
 let distance_ball_slingshot_x = 0;
 let distance_ball_slingshot_y = 0;
 
-let spring_discplacement = 0;
+let spring_displacement = 0;
 let sring_force = 0;
 
 let launch_velocity = 0;
@@ -321,19 +321,19 @@ function draw() {
         ball_x,
         ball_y
       );
-      spring_discplacement = distance_ball_slingshot - spring_constants.l_0;
+      spring_displacement = distance_ball_slingshot - spring_constants.l_0;
       //could implement if statement here to save computation (only calc spring_force when displacement is in range)
       let angle_of_attack = atan2(ball_y - slingshot_metrics.center_y, ball_x - slingshot_metrics.center_x)
 
-      spring_force = spring_constants.n * spring_discplacement
+      spring_force = spring_constants.n * spring_displacement
 
-      let spring_force_x = spring_force * cos(angle_of_attack) + 0.8 * ball_velocity_x;
-      let spring_force_y = spring_force * sin(angle_of_attack) + 0.8 * ball_velocity_y;
+      let spring_acceleration_x = spring_force / ball_mass * cos(angle_of_attack) + spring_constants.r_m * ball_velocity_x;
+      let spring_acceleration_y = spring_force / ball_mass * sin(angle_of_attack) + gravity + spring_constants.r_m * ball_velocity_y;
 
-      ball_velocity_x -= spring_force_x * dt / ball_mass
-      ball_velocity_y -= spring_force_y * dt / ball_mass
+      ball_velocity_x -= spring_acceleration_x * dt
+      ball_velocity_y -= spring_acceleration_y * dt
 
-      if (spring_discplacement <= 0) {
+      if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
 
