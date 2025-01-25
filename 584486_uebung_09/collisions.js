@@ -6,7 +6,6 @@
 function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
   distance = dist(ball_0_x, ball_0_y, ball_1_x, ball_1_y);
   if (distance < ball_d) {
-    ball_has_been_reflected = true;
     return true;
   }
   else {
@@ -16,7 +15,6 @@ function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
 
 function ground_collision(ball_x, ball_y) {
   if ((ball_y - ball_d / 2 <= metric.height) && (ball_x < 0) && (ball_x > -metric.right_rect_width - metric.left_rect_width - metric.hole_width)) {
-    ball_has_been_reflected = true;
     return true;
   }
   else {
@@ -26,7 +24,6 @@ function ground_collision(ball_x, ball_y) {
 
 function hole_ground_collision(ball_y) {
   if (ball_y - ball_d / 2 <= (metric.hole_height)) {
-    ball_has_been_reflected = true;
     return true;
   } else {
     return false;
@@ -35,7 +32,6 @@ function hole_ground_collision(ball_y) {
 
 function wall_collision(ball_x, ball_y) {
   if ((ball_x - ball_d / 2) <= (-metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width) && (ball_y < metric.schornstein_height + ball_d)) {
-    ball_has_been_reflected = true;
     return true;
   }
   else {
@@ -53,7 +49,6 @@ function obstacle_collision_left(ball_x, ball_y) {
   const distance_obstacle_left = distance_to_segment(ball_x, ball_y, segment_obstacle_left)
   if (distance_obstacle_left <= ball_d / 2) {
     console.log("OBSTACLE COLLISION LEFT!")
-    ball_has_been_reflected = true;
     return true;
   } else {
     return false;
@@ -122,7 +117,6 @@ function triangle_collision(ball_x, ball_y) {
   console.log("DISTANCE TO TRIANGLE:", distance)
   if (distance <= ball_d / 2) {
     console.log("TRIANGLE COLLISION!")
-    ball_has_been_reflected = true;
     return { collision: true, distance: distance };
   } else {
     return false;
@@ -235,11 +229,11 @@ function check_collisions() {
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
     if (ground_collision(ball_x, ball_y) && game_state != STATE_ON_CATAPULT) {
-      game_state = STATE_MOVING_ON_PLANE;
       if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
         ball_velocity_y += gravity * dt;
         ball_y = metric.height + ball_d / 2;
         ball_velocity_y = -ball_velocity_y * ball_bounce;
+        num_ball_bounces += 1;
       } else {
         ball_velocity_x *= plane_friction;
         ball_velocity_y = 0;

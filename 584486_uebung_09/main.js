@@ -397,6 +397,7 @@ function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
+  num_ball_bounces = 0;
   reset_balls();
 
   game_state = STATE_START;
@@ -496,6 +497,9 @@ function display_info(mx, my) {
   y += 24;
 
   text(`Wind Speed: ${wind_speed} m/s`, x, y);
+  y += 24;
+
+  text(`Total Bounces: ${num_ball_bounces}`, x, y);
   y += 24;
 }
 
