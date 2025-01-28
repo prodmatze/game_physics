@@ -101,7 +101,6 @@ function calculate_angle(ball_velocity_x, ball_velocity_y, segment) {
 
   let angle_velocity_segment = velocity_vector.angleBetween(segment_vector)
 
-  console.log("angle_velocity_segment", angle_velocity_segment)
   return { angle: degrees(angle_velocity_segment), velocity: velocity }
 }
 
@@ -114,7 +113,6 @@ function triangle_collision(ball_x, ball_y) {
   }
   const distance = distance_to_segment(ball_x, ball_y, segment)
 
-  console.log("DISTANCE TO TRIANGLE:", distance)
   if (distance <= ball_d / 2) {
     console.log("TRIANGLE COLLISION!")
     return { collision: true, distance: distance };
@@ -229,8 +227,9 @@ function check_collisions() {
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
     if (ground_collision(ball_x, ball_y) && game_state != STATE_ON_CATAPULT) {
-      if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
+      if (game_state == STATE_MOVING_IN_AIR) {
         ball_y = metric.height + ball_d / 2;
+        console.log("GROUND COLLISION!", "BOUNCING BALL", ball_velocity_y)
         ball_velocity_y = -ball_velocity_y * ball_bounce;
         num_ball_bounces += 1;
       } else {
@@ -241,11 +240,11 @@ function check_collisions() {
   } else {
     console.log("PLAYBALL IS OVER HOLE");
     if (hole_ground_collision(ball_y)) {
-      if (Math.abs(ball_velocity_y) >= bounce_velocity_threshold) {
-        game_state = STATE_MOVING_ON_PLANE;
+      if (game_state == STATE_MOVING_IN_AIR) {
         console.log("PLAYBALL BALL GROUND COLLISION AT: ", Math.abs(ball_velocity_y))
         ball_velocity_y = -ball_velocity_y * ball_bounce;
         ball_velocity_y += gravity * dt;
+        num_ball_bounces += 1;
       } else {
         ball_velocity_x *= plane_friction;
         ball_y = metric.hole_height + ball_d / 2;
