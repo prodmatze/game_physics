@@ -52,6 +52,9 @@ let ball_bounce_together_factor = 0.3;
 let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
+//after 7 bounces, the balls velocity equals 20% of its starting velocity
+let max_num_ball_bounces = 7;
+
 let plane_friction = 0.999;
 
 let gravity = 9.81;
@@ -320,9 +323,6 @@ function draw() {
         ball_y = my;
       }
 
-      if (num_ball_bounces >= 10) {
-        game_state = STATE_MOVING_ON_PLANE;
-      }
       break;
 
     case STATE_ON_CATAPULT:
@@ -348,7 +348,6 @@ function draw() {
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
-
       break;
 
     case STATE_MOVING_IN_AIR:
@@ -363,9 +362,13 @@ function draw() {
 
       red_ball_velocity_y -= gravity * dt;
       check_collisions();
+      if (num_ball_bounces >= max_num_ball_bounces) {
+        game_state = STATE_MOVING_ON_PLANE;
+      }
       break;
 
     case STATE_MOVING_ON_PLANE:
+      //keep ball locked to ground plane, without this the ball would either levitate or fly up
       ball_velocity_y -= gravity * dt;
       red_ball_velocity_y -= gravity * dt;
 
@@ -397,7 +400,6 @@ function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
   remaining_attempts = 5;
-  num_ball_bounces = 0;
   reset_balls();
 
   game_state = STATE_START;
@@ -417,6 +419,8 @@ function reset_balls() {
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
   red_ball_is_in_hole = false;
+
+  num_ball_bounces = 0;
 }
 
 function position_ball_to_triangle() {

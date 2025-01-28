@@ -408,7 +408,7 @@ function check_collisions() {
     let edge_vector = createVector(segment.x2 - segment.x1, segment.y2 - segment.y1)
     let orthogonal_edge_vector = createVector(-edge_vector.y, edge_vector.x).normalize();
 
-    let collision_result = triangle_collision(red_ball_x, red_ball_y);
+    let collision_result = triangle_collision(ball_x, ball_y);
     let pen_depth = ball_d / 2 - collision_result.distance
 
     //ball_x, ball_y, ball_velocity_slope = roll_down_slope(ball_x, ball_y);
@@ -417,7 +417,7 @@ function check_collisions() {
       ball_y += orthogonal_edge_vector.y * (pen_depth + 0.01)
     }
 
-    let velocity_vector = createVector(red_ball_velocity_x, red_ball_velocity_y)
+    let velocity_vector = createVector(ball_velocity_x, ball_velocity_y)
     let reflected = p5.Vector.sub(velocity_vector, orthogonal_edge_vector.mult(2 * velocity_vector.dot(orthogonal_edge_vector)));
 
     let angle_velocity = calculate_angle(red_ball_velocity_x, red_ball_velocity_y, segment)
