@@ -222,6 +222,11 @@ function check_hole_right(ball_x, ball_y) {
   }
 }
 
+function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
+  return None
+
+}
+
 function check_collisions() {
 
   //ground collision for play_ball
@@ -231,8 +236,10 @@ function check_collisions() {
         ball_y = metric.height + ball_d / 2;
         console.log("GROUND COLLISION!", "BOUNCING BALL", ball_velocity_y)
         ball_velocity_y = -ball_velocity_y * ball_bounce;
+        ball_velocity_x *= ball_bounce
         num_ball_bounces += 1;
       } else {
+        ball_y = metric.height + ball_d / 2;
         ball_velocity_x *= plane_friction;
         ball_velocity_y = 0;
       }
