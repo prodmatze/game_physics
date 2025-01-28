@@ -41,6 +41,8 @@ let sring_force = 0;
 let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
+
+
 let play_ball_is_in_hole = false;
 
 let red_ball_velocity_x = 0;
@@ -51,6 +53,10 @@ let ball_bounce = 0.8;
 let ball_bounce_together_factor = 0.3;
 let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
+
+let ball_has_bounced = false;
+let ball_initial_bounce_velocity = 0;
+let ball_current_velocity;
 
 //after 7 bounces, the balls velocity equals 20% of its starting velocity
 let max_num_ball_bounces = 7;
@@ -276,8 +282,12 @@ function draw() {
   dt = deltaTime / 1000;
   ball_x += ball_velocity_x * dt;
   ball_y += ball_velocity_y * dt;
+  ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
 
-  red_ball_x += red_ball_velocity_x * dt;
+  ball_acceleration_x =
+
+
+    red_ball_x += red_ball_velocity_x * dt;
   red_ball_y += red_ball_velocity_y * dt;
   /* display */
   push();
@@ -363,7 +373,10 @@ function draw() {
       red_ball_velocity_y -= gravity * dt;
       check_collisions(ball_x, ball_y);
       //check_collisions(red_ball_x, red_ball_y);
-      if (num_ball_bounces >= max_num_ball_bounces) {
+      //
+      console.log("ball current velocity:", ball_current_velocity)
+      console.log("ball_INITIAL_VELOCITY", ball_initial_bounce_velocity)
+      if (ball_current_velocity <= ball_initial_bounce_velocity * 0.1) {
         game_state = STATE_MOVING_ON_PLANE;
       }
       break;

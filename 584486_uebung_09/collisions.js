@@ -44,6 +44,11 @@ function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
 
   ball_velocity_x = reflected.x * ball_bounce
   ball_velocity_y = reflected.y * ball_bounce
+
+  if (!ball_has_bounced) {
+    ball_has_bounced = true
+    ball_initial_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
+  }
   num_ball_bounces += 1;
 
   let new_velocity = { x: ball_velocity_x, y: ball_velocity_y }
@@ -177,6 +182,22 @@ function wall_collision(ball_x, ball_y) {
 }
 
 
+function triangle_test_collision(ball_x, ball_y) {
+  let segment = {
+    x1: triangle_coords.x1,
+    y1: triangle_coords.y1,
+    x2: triangle_coords.x3,
+    y2: triangle_coords.y3
+  }
+  if (distance_to_segment(ball_x, ball_y, segment) <= ball_d / 2) {
+    return { collision: true, segment: segment };
+  }
+  else {
+    return { collision: false, segment: null };
+  }
+}
+
+
 function triangle_collision(ball_x, ball_y) {
   segment = {
     x1: triangle_coords.x1,
@@ -272,8 +293,6 @@ function check_collisions(ball_x, ball_y) {
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
-
 
 
   //checks which ball is faster to make them collide accordingly
