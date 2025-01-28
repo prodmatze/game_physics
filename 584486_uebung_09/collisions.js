@@ -42,17 +42,10 @@ function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
   let velocity_vector = createVector(ball_velocity_x, ball_velocity_y)
   let reflected = p5.Vector.sub(velocity_vector, orthogonal_edge_vector.mult(2 * velocity_vector.dot(orthogonal_edge_vector)));
 
-  ball_velocity_x = reflected.x * ball_bounce
-  ball_velocity_y = reflected.y * ball_bounce
 
-  if (!ball_has_bounced) {
-    ball_has_bounced = true
-    ball_initial_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
-  }
-  num_ball_bounces += 1;
 
-  let new_velocity = { x: ball_velocity_x, y: ball_velocity_y }
-  return new_velocity
+  let reflection = { x: reflected.x * ball_bounce, y: reflected.y * ball_bounce, normal: orthogonal_edge_vector }
+  return reflection
 }
 
 function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
@@ -139,7 +132,7 @@ function hole_collision_right(ball_x, ball_y) {
 }
 
 function obstacle_collision_left(ball_x, ball_y) {
-  obstacle_left_segment = {
+  let obstacle_left_segment = {
     x1: obstacle.x,
     y1: obstacle.y,
     x2: obstacle.x,
@@ -153,7 +146,7 @@ function obstacle_collision_left(ball_x, ball_y) {
 }
 
 function obstacle_collision_right(ball_x, ball_y) {
-  obstacle_right_segment = {
+  let obstacle_right_segment = {
     x1: obstacle.x + obstacle.width,
     y1: obstacle.y,
     x2: obstacle.x + obstacle.width,
@@ -234,67 +227,98 @@ function check_hole_top(ball_x) {
   }
 }
 
+function detect_collision(ball_x, ball_y, segment) {
+  const distance = distance_to_segment(ball_x, ball_y, segment)
 
+  if (!ball_has_bounced) {
+    ball_has_bounced = true
+    ball_initial_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
+  }
+  if (ball_current_velocity <= ball_initial_bounce_velocity * 0.1) {
+    //game_state = STATE_MOVING_ON_PLANE;
+  }
+
+  num_ball_bounces += 1;
+  if (distance <= ball_d / 2) {
+    return { collision: true, segment: segment, penetration: ball_d / 2 - distance };
+  } else {
+    return { collision: false };
+  }
+}
 
 function check_collisions(ball_x, ball_y) {
 
+  for (let segment of segments) {
+    let collision = detect_collision(ball_x, ball_y, segment);
+    if (collision.collision) {
+      let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
+
+      ball_x += collision.penetration * reflection.normal.x;
+      ball_y += collision.penetration * reflection.normal.y;
+
+      ball_velocity_x = reflection.x;
+      ball_velocity_y = reflection.y;
+    }
+  }
+
+  /*
   let right_ground_collision = ground_collision_right(ball_x, ball_y);
   if (right_ground_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, right_ground_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let left_ground_collision = ground_collision_left(ball_x, ball_y);
   if (left_ground_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, left_ground_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let hole_ground_collision = ground_collision_hole(ball_x, ball_y);
   if (hole_ground_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, hole_ground_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let hole_left_collision = hole_collision_left(ball_x, ball_y);
   if (hole_left_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, hole_left_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let hole_right_collision = hole_collision_right(ball_x, ball_y);
   if (hole_right_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, hole_right_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let obstacle_left_collision = obstacle_collision_left(ball_x, ball_y);
   if (obstacle_left_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, obstacle_left_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let obstacle_right_collision = obstacle_collision_right(ball_x, ball_y);
   if (obstacle_right_collision.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, obstacle_right_collision.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
+ 
   let wall_collision_result = wall_collision(ball_x, ball_y);
   if (wall_collision_result.collision) {
     let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, wall_collision_result.segment)
     ball_velocity_x = reflection.x
     ball_velocity_y = reflection.y
   }
-
-
+ 
+ 
   //checks which ball is faster to make them collide accordingly
   if (Math.abs(ball_velocity_x) > Math.abs(red_ball_velocity_x)) {
     if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
@@ -317,8 +341,8 @@ function check_collisions(ball_x, ball_y) {
       red_ball_velocity_x *= 0.4;
     }
   }
-
-
+ 
+ 
   /*
   //check if balls collide vertically
   if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
@@ -332,6 +356,7 @@ function check_collisions(ball_x, ball_y) {
   }
   */
 
+  /*
   //triangle_collision for play_ball
   if (triangle_collision(ball_x, ball_y)) {
     segment = {
@@ -395,8 +420,8 @@ function check_collisions(ball_x, ball_y) {
 
     red_ball_velocity_x = reflected.x * ball_bounce
     red_ball_velocity_y = reflected.y * ball_bounce
-
-
-  }
+*/
 
 }
+
+

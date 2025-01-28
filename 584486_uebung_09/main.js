@@ -355,6 +355,7 @@ function draw() {
       ball_velocity_x -= spring_acceleration_x * dt
       ball_velocity_y -= spring_acceleration_y * dt
 
+      check_collisions_in_flight(ball_x, ball_y);
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
@@ -371,22 +372,18 @@ function draw() {
       ball_velocity_y += ball_acceleration_y * dt;
 
       red_ball_velocity_y -= gravity * dt;
-      check_collisions(ball_x, ball_y);
+      check_collisions_in_flight(ball_x, ball_y);
       //check_collisions(red_ball_x, red_ball_y);
       //
       console.log("ball current velocity:", ball_current_velocity)
       console.log("ball_INITIAL_VELOCITY", ball_initial_bounce_velocity)
-      if (ball_current_velocity <= ball_initial_bounce_velocity * 0.1) {
-        game_state = STATE_MOVING_ON_PLANE;
-      }
       break;
 
     case STATE_MOVING_ON_PLANE:
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
-      ball_velocity_y -= gravity * dt;
-      red_ball_velocity_y -= gravity * dt;
+      //ball_velocity_x *= plane_friction * dt;
+      ball_y = metric.height + ball_d / 2;
 
-      check_collisions(ball_x, ball_y);
       break;
 
     case STATE_END_MOVEMENT:
@@ -433,6 +430,8 @@ function reset_balls() {
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
   red_ball_is_in_hole = false;
+
+  ball_has_bounced = false;
 
   num_ball_bounces = 0;
 }
