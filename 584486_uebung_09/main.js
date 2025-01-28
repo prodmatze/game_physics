@@ -361,7 +361,8 @@ function draw() {
       ball_velocity_y += ball_acceleration_y * dt;
 
       red_ball_velocity_y -= gravity * dt;
-      check_collisions();
+      check_collisions(ball_x, ball_y);
+      //check_collisions(red_ball_x, red_ball_y);
       if (num_ball_bounces >= max_num_ball_bounces) {
         game_state = STATE_MOVING_ON_PLANE;
       }
@@ -372,7 +373,7 @@ function draw() {
       ball_velocity_y -= gravity * dt;
       red_ball_velocity_y -= gravity * dt;
 
-      check_collisions();
+      check_collisions(ball_x, ball_y);
       break;
 
     case STATE_END_MOVEMENT:
@@ -494,7 +495,7 @@ function display_info(mx, my) {
   text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);
   y += 24;
 
-  text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
+  text(`Mouse X: ${mx} - Mouse Y: ${my}`, x, y);
   y += 24;
 
   text(`Current State: ${game_state}`, x, y);
