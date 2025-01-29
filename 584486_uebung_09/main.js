@@ -58,6 +58,9 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity;
 
+//generate segments
+let segments = [];
+
 //after 7 bounces, the balls velocity equals 20% of its starting velocity
 let max_num_ball_bounces = 7;
 
@@ -245,16 +248,11 @@ console.log('CURRENT GAME STATE:', game_state);
 /* run program */
 function draw() {
   background(255);
-  let triangle_segment = {
-    x1: triangle_coords.x1,
-    y1: triangle_coords.y1,
-    x2: triangle_coords.x3,
-    y2: triangle_coords.y3
-  }
-  calculate_angle(ball_velocity_x, ball_velocity_y, triangle_segment)
 
   /* administration */
   fill(0);
+
+  segments = generate_segments();
 
   //position buttons
   position_buttons();
@@ -432,8 +430,8 @@ function reset_balls() {
   red_ball_is_in_hole = false;
 
   ball_has_bounced = false;
-
   num_ball_bounces = 0;
+  ball_initial_bounce_velocity = 0;
 }
 
 function position_ball_to_triangle() {

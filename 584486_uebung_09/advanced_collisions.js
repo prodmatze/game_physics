@@ -24,6 +24,7 @@ function distance_to_segment(ball_x, ball_y, segment) {
   return dist(ball_x, ball_y, closestX, closestY);
 }
 
+/*
 function calculate_angle(ball_velocity_x, ball_velocity_y, segment) {
 
   let velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y);
@@ -34,6 +35,7 @@ function calculate_angle(ball_velocity_x, ball_velocity_y, segment) {
 
   return { angle: degrees(angle_velocity_segment), velocity: velocity }
 }
+*/
 
 function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
   let edge_vector = createVector(segment.x2 - segment.x1, segment.y2 - segment.y1)
@@ -42,7 +44,7 @@ function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
   let velocity_vector = createVector(ball_velocity_x, ball_velocity_y)
   let reflected = p5.Vector.sub(velocity_vector, orthogonal_edge_vector.mult(2 * velocity_vector.dot(orthogonal_edge_vector)));
 
-  let reflection = { x: reflected.x * ball_bounce, y: reflected.y * ball_bounce, normal: orthogonal_edge_vector }
+  let reflection = { x: reflected.x, y: reflected.y, normal: orthogonal_edge_vector }
   return reflection
 }
 
@@ -90,29 +92,32 @@ function detect_collision(ball_x, ball_y, segment) {
   }
 }
 
-function update_game_state() {
+function update_game_state(current_bounce_velocity) {
   if (!ball_has_bounced) {
     ball_has_bounced = true
     ball_initial_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
   }
-  let current_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
   if (current_bounce_velocity <= (ball_initial_bounce_velocity * 0.1)) {
     game_state = STATE_MOVING_ON_PLANE;
   }
 }
 
+
+
 function check_collisions_in_flight(ball_x, ball_y) {
+
 
   for (let segment of segments) {
     let collision = detect_collision(ball_x, ball_y, segment);
     if (collision.collision) {
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
+      let current_bounce_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
 
       ball_x += collision.penetration * reflection.normal.x;
       ball_y += collision.penetration * reflection.normal.y;
-      ball_velocity_x = reflection.x;
-      ball_velocity_y = reflection.y;
-      update_game_state();
+      ball_velocity_x = reflection.x * ball_bounce;
+      ball_velocity_y = reflection.y * ball_bounce;
+      update_game_state(current_bounce_velocity);
 
       break;
     }
