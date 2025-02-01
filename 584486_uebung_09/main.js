@@ -42,6 +42,8 @@ let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
 
+let ball_acceleration_x = 0;
+let ball_acceleration_y = 0;
 
 let play_ball_is_in_hole = false;
 
@@ -55,8 +57,8 @@ let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
 let ball_has_bounced = false;
-let ball_initial_bounce_velocity = 0;
-let ball_current_velocity;
+let ball_initial_bounce_velocity = 100;
+let ball_current_velocity = 0;
 
 //generate segments
 let segments = [];
@@ -282,10 +284,10 @@ function draw() {
   ball_y += ball_velocity_y * dt;
   ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
 
-  ball_acceleration_x =
 
 
-    red_ball_x += red_ball_velocity_x * dt;
+
+  red_ball_x += red_ball_velocity_x * dt;
   red_ball_y += red_ball_velocity_y * dt;
   /* display */
   push();
@@ -361,10 +363,16 @@ function draw() {
 
     case STATE_MOVING_IN_AIR:
       //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
-      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
+      //velocity threshold to prevent drag from affecting slow moving ball, leading to infinite bounces
+      if (ball_current_velocity >= 4) {
+        let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
-      let ball_acceleration_x = drag.ax;
-      let ball_acceleration_y = drag.ay - gravity;
+        ball_acceleration_x = drag.ax;
+        ball_acceleration_y = drag.ay - gravity;
+      } else {
+        ball_acceleration_x = 0;
+        ball_acceleration_y = -gravity;
+      }
 
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
@@ -380,7 +388,13 @@ function draw() {
     case STATE_MOVING_ON_PLANE:
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
       //ball_velocity_x *= plane_friction * dt;
-      ball_y = metric.height + ball_d / 2;
+      //check_collisions_on_plane(ball_x, ball_y);
+
+      check_collisions_in_flight(ball_x, ball_y);
+      if (!check_hole_top && ball_x >= triangle_coords.x3) {
+        ball_velocity_y = 0;
+        ball_y = metric.height + ball_d / 2;
+      }
 
       break;
 
@@ -421,6 +435,8 @@ function reset_balls() {
   launch_velocity = 0;
   ball_velocity_x = 0;
   ball_velocity_y = 0;
+  ball_acceleration_x = 0;
+  ball_acceleration_y = 0;
   play_ball_is_in_hole = false;
 
   red_ball_x = -playground.width / 2 + 1;
@@ -431,7 +447,8 @@ function reset_balls() {
 
   ball_has_bounced = false;
   num_ball_bounces = 0;
-  ball_initial_bounce_velocity = 0;
+  ball_current_velocity = 0;
+  ball_initial_bounce_velocity = 100;
 }
 
 function position_ball_to_triangle() {
@@ -505,7 +522,7 @@ function display_info(mx, my) {
   text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);
   y += 24;
 
-  text(`Mouse X: ${mx} - Mouse Y: ${my}`, x, y);
+  text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
   y += 24;
 
   text(`Current State: ${game_state}`, x, y);
@@ -515,6 +532,15 @@ function display_info(mx, my) {
   y += 24;
 
   text(`Total Bounces: ${num_ball_bounces}`, x, y);
+  y += 24;
+
+  text(`Ball has BOUNCED: ${ball_has_bounced}`, x, y);
+  y += 24;
+
+  text(`Initial Bounce Velocity: ${ball_initial_bounce_velocity}`, x, y);
+  y += 24;
+
+  text(`Ball current Velocity : ${ball_current_velocity}`, x, y);
   y += 24;
 }
 

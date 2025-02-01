@@ -20,10 +20,12 @@ function generate_segments() {
     y2: metric.hole_height
   };
 
+
   let hole_left_segment = {
-    x1: -metric.right_rect_width - metric.hole_width,
+    //add ball radius cuz bug
+    x1: -metric.right_rect_width - metric.hole_width + ball_d / 2,
     y1: metric.hole_height,
-    x2: -metric.right_rect_width - metric.hole_width,
+    x2: -metric.right_rect_width - metric.hole_width + ball_d / 2,
     y2: metric.height
   };
 
