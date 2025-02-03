@@ -3,6 +3,19 @@
 /* Übung Nr.9 */
 /* Datum: 25.01.2025 */
 
+function update_game_state() {
+  console.log("UPDATING GAME STATE!")
+  console.log("ball_has_bounced:", ball_has_bounced)
+  console.log("Current Velocity:", ball_current_velocity)
+  console.log("Initial Velocity", ball_initial_bounce_velocity)
+  ball_current_velocity = Math.sqrt(ball_velocity_x ** 2 + ball_velocity_y ** 2);
+  if (ball_has_bounced == false) {
+    console.log("Setting ball_has_bounced to true")
+    ball_has_bounced = true;
+    (ball_initial_bounce_velocity = ball_current_velocity);
+  }
+}
+
 function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
   distance = dist(ball_0_x, ball_0_y, ball_1_x, ball_1_y);
   if (distance < ball_d) {
@@ -15,6 +28,10 @@ function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
 
 function ground_collision(ball_x, ball_y) {
   if ((ball_y - ball_d / 2 <= metric.height) && (ball_x < 0) && (ball_x > -metric.right_rect_width - metric.left_rect_width - metric.hole_width)) {
+    if (ball_has_bounced == false) {
+      (ball_initial_bounce_velocity = ball_current_velocity)
+    }
+    update_game_state();
     return true;
   }
   else {
@@ -119,69 +136,6 @@ function triangle_collision(ball_x, ball_y) {
   } else {
     return false;
   }
-}
-
-let slope_dx = triangle_coords.x3 - triangle_coords.x1;
-let slope_dy = triangle_coords.y3 - triangle_coords.y1;
-let slope_length = Math.sqrt(slope_dx * slope_dx + slope_dy * slope_dy);
-
-let slope_unit_x = slope_dx / slope_length;
-let slope_unit_y = slope_dy / slope_length;
-let normal_unit_x = -slope_unit_y;
-let normal_unit_y = slope_unit_x;
-
-let acceleration_slope = -gravity * slope_unit_y;
-
-function roll_down_slope(ball_x, ball_y) {
-  let ball_velocity_slope = ball_velocity_x * slope_unit_x + ball_velocity_y * slope_unit_y;
-
-
-  ball_velocity_slope += (acceleration_slope * dt);
-  ball_velocity_x = ball_velocity_slope * slope_unit_x * (plane_friction);
-  ball_velocity_y = ball_velocity_slope * slope_unit_y * (plane_friction);
-
-  ball_x += ball_velocity_x * dt;
-  ball_y += ball_velocity_y * dt;
-
-  if (game_state == STATE_MOVING_IN_AIR) {
-    let t = ((ball_x - triangle_coords.x1) * slope_dx + (ball_y - triangle_coords.y1) * slope_dy) / (slope_length * slope_length);
-    if (t >= 1) {
-      // Ball has left the slope
-      ball_y = metric.height;
-      game_state = STATE_MOVING_ON_PLANE;
-      ball_velocity_x = ball_velocity_slope;
-    } else {
-      // Adjust ball's position to be on the slope
-      ball_x = triangle_coords.x1 + t * slope_dx;
-      ball_y = triangle_coords.y1 + t * slope_dy;
-    }
-  }
-
-
-  return ball_x, ball_y, ball_velocity_slope;
-}
-function roll_down_slope_red_ball(ball_x, ball_y) {
-  let ball_velocity_slope = red_ball_velocity_x * slope_unit_x + red_ball_velocity_y * slope_unit_y;
-
-  ball_velocity_slope += (acceleration_slope * dt);
-
-  red_ball_velocity_x = ball_velocity_slope * slope_unit_x;
-  red_ball_velocity_y = ball_velocity_slope * slope_unit_y;
-
-  ball_x += red_ball_velocity_x * dt;
-  ball_y += red_ball_velocity_y * dt;
-
-  let t = ((ball_x - triangle_coords.x1) * slope_dx + (ball_y - triangle_coords.y1) * slope_dy) / (slope_length * slope_length);
-  if (t >= 1 && abs(ball_velocity_y) < 5) {
-    // Ball has left the slope
-    ball_y = metric.height;
-    ball_velocity_x = ball_velocity_slope;
-  } else {
-    // Adjust ball's position to be on the slope
-    ball_x = triangle_coords.x1 + t * slope_dx;
-    ball_y = triangle_coords.y1 + t * slope_dy;
-  }
-  return ball_x, ball_y, ball_velocity_slope;
 }
 
 function check_hole_top(ball_x) {
@@ -370,6 +324,9 @@ function check_collisions() {
   }
 
   //triangle_collision for play_ball
+  //hier wird nun der normalen-vektor der Reflektion berechnet und dann der Ball dementsprechent
+  //reflektiert und der "bounce_factor" mit der Geschwindigkeit verrechnet, so dass der Ball
+  //an Geschwindigkeit verliert
   if (triangle_collision(ball_x, ball_y)) {
     segment = {
       x1: triangle_coords.x1,

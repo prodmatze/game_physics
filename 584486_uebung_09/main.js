@@ -52,8 +52,9 @@ let ball_bounce_together_factor = 0.3;
 let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
-//after 7 bounces, the balls velocity equals 20% of its starting velocity
-let max_num_ball_bounces = 7;
+let ball_has_bounced = false;
+let ball_initial_bounce_velocity;
+let ball_current_velocity = 0;
 
 let plane_friction = 0.999;
 
@@ -279,6 +280,10 @@ function draw() {
 
   red_ball_x += red_ball_velocity_x * dt;
   red_ball_y += red_ball_velocity_y * dt;
+
+  //calculate ball velocity for every frame (important for state change)
+  ball_current_velocity = Math.sqrt(ball_velocity_x ** 2 + ball_velocity_y ** 2);
+
   /* display */
   push();
 
@@ -362,9 +367,11 @@ function draw() {
 
       red_ball_velocity_y -= gravity * dt;
       check_collisions();
-      if (num_ball_bounces >= max_num_ball_bounces) {
+
+      if (ball_initial_bounce_velocity && (ball_current_velocity <= ball_initial_bounce_velocity * 0.1)) {
         game_state = STATE_MOVING_ON_PLANE;
       }
+
       break;
 
     case STATE_MOVING_ON_PLANE:
