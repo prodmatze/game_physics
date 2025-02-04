@@ -120,46 +120,64 @@ function update_velocity(ball_velocity_x, ball_velocity_y) {
 
 
 function check_collisions_in_flight(ball_x, ball_y) {
+  let deepest_collision = null;
+  let best_reflection = null;
 
   for (let segment of segments) {
     let collision = detect_collision(ball_x, ball_y, segment);
     if (collision.collision) {
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
 
-      let normal_x = reflection.normal.x;
-      let normal_y = reflection.normal.y;
-
-      let current_bounce_velocity = Math.abs(ball_velocity_x * normal_x + ball_velocity_y * normal_y);
-
-      ball_x += collision.penetration * reflection.normal.x;
-      ball_y += collision.penetration * reflection.normal.y;
-
-      ball_velocity_x = reflection.x * ball_bounce;
-      ball_velocity_y = reflection.y * ball_bounce;
-
-      update_game_state(current_bounce_velocity);
-      break;
+      if (!deepest_collision || collision.penetration > deepest_collision) {
+        deepest_collision = collision;
+        best_reflection = reflection;
+      }
     }
+  }
+  if (deepest_collision) {
+    let normal_x = best_reflection.normal.x;
+    let normal_y = best_reflection.normal.y;
+
+    let current_bounce_velocity = Math.abs(ball_velocity_x * normal_x + ball_velocity_y * normal_y);
+
+    ball_x += deepest_collision.penetration * normal_x;
+    ball_y += deepest_collision.penetration * normal_y;
+
+    ball_velocity_x = best_reflection.x * ball_bounce;
+    ball_velocity_y = best_reflection.y * ball_bounce;
+
+    update_game_state(current_bounce_velocity);
   }
 }
+
 function check_collisions_on_plane(ball_x, ball_y) {
+  let deepest_collision = null;
+  let best_reflection = null;
 
   for (let segment of segments) {
     let collision = detect_collision(ball_x, ball_y, segment);
     if (collision.collision) {
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
 
-      let normal_x = reflection.normal.x;
-      let normal_y = reflection.normal.y;
-
-      let current_bounce_velocity = Math.abs(ball_velocity_x * normal_x + ball_velocity_y * normal_y);
-
-      ball_x = collision.penetration * reflection.normal.x;
-      ball_y = collision.penetration * reflection.normal.y;
-      update_game_state(current_bounce_velocity);
-      break;
+      if (!deepest_collision || collision.penetration > deepest_collision) {
+        deepest_collision = collision;
+        best_reflection = reflection;
+      }
     }
   }
+  if (deepest_collision) {
+    let normal_x = best_reflection.normal.x;
+    let normal_y = best_reflection.normal.y;
+
+    ball_x += deepest_collision.penetration * normal_x;
+    ball_y += deepest_collision.penetration * normal_y;
+
+    ball_velocity_x = best_reflection.x * ball_bounce;
+    ball_velocity_y = best_reflection.y * ball_bounce;
+  } else {
+    ball_velocity_y -= gravity * dt;
+  }
+
 }
 
 

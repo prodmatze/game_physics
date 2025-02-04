@@ -1,4 +1,5 @@
 function generate_segments() {
+
   let ground_segment_left = {
     x1: -metric.right_rect_width - metric.hole_width - metric.left_rect_width,
     y1: metric.height,
@@ -56,6 +57,7 @@ function generate_segments() {
     x2: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width,
     y2: metric.height
   };
+
   let triangle_segment = {
     x1: triangle_coords.x1,
     y1: triangle_coords.y1,
@@ -66,10 +68,5 @@ function generate_segments() {
   let segments = [ground_segment_left, ground_segment_right, hole_ground_segment, hole_left_segment, hole_right_segment, obstacle_left_segment, obstacle_right_segment, wall_segment, triangle_segment];
 
   return segments;
-}
-
-function get_segments_list() {
-
-  return segments
 }
 
