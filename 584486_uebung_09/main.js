@@ -389,12 +389,10 @@ function draw() {
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
       //ball_velocity_x *= plane_friction * dt;
       //check_collisions_on_plane(ball_x, ball_y);
+      ball_velocity_y += -gravity * dt;
 
-      check_collisions_in_flight(ball_x, ball_y);
-      if (!check_hole_top && ball_x >= triangle_coords.x3) {
-        ball_velocity_y = 0;
-        ball_y = metric.height + ball_d / 2;
-      }
+
+      check_collisions_on_plane(ball_x, ball_y);
 
       break;
 

@@ -94,12 +94,8 @@ function detect_collision(ball_x, ball_y, segment) {
 
 function update_game_state(current_bounce_velocity) {
   if (!ball_has_bounced) {
-    ball_has_bounced = true
-    if (ball_current_velocity <= 3) {
-      ball_initial_bounce_velocity = 3;
-    } else {
-      ball_initial_bounce_velocity = ball_current_velocity;
-    }
+    ball_has_bounced = true;
+    ball_initial_bounce_velocity = current_bounce_velocity;
   }
   if (current_bounce_velocity <= (ball_initial_bounce_velocity * 0.1)) {
     game_state = STATE_MOVING_ON_PLANE;
@@ -129,7 +125,11 @@ function check_collisions_in_flight(ball_x, ball_y) {
     let collision = detect_collision(ball_x, ball_y, segment);
     if (collision.collision) {
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
-      let current_bounce_velocity = get_current_velocity(ball_velocity_x, ball_velocity_y)
+
+      let normal_x = reflection.normal.x;
+      let normal_y = reflection.normal.y;
+
+      let current_bounce_velocity = Math.abs(ball_velocity_x * normal_x + ball_velocity_y * normal_y);
 
       ball_x += collision.penetration * reflection.normal.x;
       ball_y += collision.penetration * reflection.normal.y;
@@ -142,60 +142,23 @@ function check_collisions_in_flight(ball_x, ball_y) {
 }
 function check_collisions_on_plane(ball_x, ball_y) {
 
-
   for (let segment of segments) {
-    console.log("SEGMENTS:", segments)
-    console.log("CURRENT SEGMENT BEING CHECKED:", segment)
     let collision = detect_collision(ball_x, ball_y, segment);
     if (collision.collision) {
-      ball_velocity_y = 0;
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, segment);
 
-      ball_x += collision.penetration * reflection.normal.x;
-      ball_y += collision.penetration * reflection.normal.y;
+      let normal_x = reflection.normal.x;
+      let normal_y = reflection.normal.y;
 
-      ball_velocity_x = reflection.x;
-      ball_velocity_y = reflection.y;
+      let current_bounce_velocity = Math.abs(ball_velocity_x * normal_x + ball_velocity_y * normal_y);
+
+      ball_x = collision.penetration * reflection.normal.x;
+      ball_y = collision.penetration * reflection.normal.y;
+      update_game_state(current_bounce_velocity);
       break;
-    } else {
-      ball_velocity_y -= gravity * dt;
     }
   }
 }
-/*
-//triangle_collision for play_ball
-if (triangle_collision(ball_x, ball_y)) {
-  segment = {
-    x1: triangle_coords.x1,
-    y1: triangle_coords.y1,
-    x2: triangle_coords.x3,
-    y2: triangle_coords.y3
-  };
- 
-  let edge_vector = createVector(segment.x2 - segment.x1, segment.y2 - segment.y1)
-  let orthogonal_edge_vector = createVector(-edge_vector.y, edge_vector.x).normalize();
- 
-  let collision_result = triangle_collision(ball_x, ball_y);
-  let pen_depth = ball_d / 2 - collision_result.distance
- 
-  //ball_x, ball_y, ball_velocity_slope = roll_down_slope(ball_x, ball_y);
-  if (pen_depth >= 0) {
-    ball_x += orthogonal_edge_vector.x * (pen_depth + 0.01)
-    ball_y += orthogonal_edge_vector.y * (pen_depth + 0.01)
-  }
- 
-  let velocity_vector = createVector(ball_velocity_x, ball_velocity_y)
-  let reflected = p5.Vector.sub(velocity_vector, orthogonal_edge_vector.mult(2 * velocity_vector.dot(orthogonal_edge_vector)));
- 
-  let angle_velocity = calculate_angle(ball_velocity_x, ball_velocity_y, segment)
-  let angle = angle_velocity.angle
-  let velocity = angle_velocity.velocity * ball_bounce
- 
-  ball_velocity_x = reflected.x * ball_bounce
-  ball_velocity_y = reflected.y * ball_bounce
- 
- 
-  */
 
 
 
