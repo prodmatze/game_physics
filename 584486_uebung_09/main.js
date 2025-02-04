@@ -377,6 +377,7 @@ function draw() {
     case STATE_MOVING_ON_PLANE:
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
       ball_velocity_y -= gravity * dt;
+      ball_velocity_x *= plane_friction;
       red_ball_velocity_y -= gravity * dt;
 
       check_collisions();
