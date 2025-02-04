@@ -133,8 +133,10 @@ function check_collisions_in_flight(ball_x, ball_y) {
 
       ball_x += collision.penetration * reflection.normal.x;
       ball_y += collision.penetration * reflection.normal.y;
+
       ball_velocity_x = reflection.x * ball_bounce;
       ball_velocity_y = reflection.y * ball_bounce;
+
       update_game_state(current_bounce_velocity);
       break;
     }

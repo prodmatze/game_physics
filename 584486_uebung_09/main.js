@@ -389,10 +389,10 @@ function draw() {
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
       //ball_velocity_x *= plane_friction * dt;
       //check_collisions_on_plane(ball_x, ball_y);
-      ball_velocity_y += -gravity * dt;
+      //ball_velocity_y += -gravity * dt;
 
 
-      check_collisions_on_plane(ball_x, ball_y);
+      check_collisions_in_flight(ball_x, ball_y);
 
       break;
 
