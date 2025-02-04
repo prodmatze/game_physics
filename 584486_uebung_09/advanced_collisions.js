@@ -97,7 +97,7 @@ function update_game_state(current_bounce_velocity) {
     ball_has_bounced = true;
     ball_initial_bounce_velocity = current_bounce_velocity;
   }
-  if (current_bounce_velocity <= (ball_initial_bounce_velocity * 0.1)) {
+  if (current_bounce_velocity <= (ball_initial_bounce_velocity * 0.1 && !check_hole_top(ball_x))) {
     game_state = STATE_MOVING_ON_PLANE;
   }
 }

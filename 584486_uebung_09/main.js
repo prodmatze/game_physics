@@ -57,7 +57,7 @@ let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
 let ball_has_bounced = false;
-let ball_initial_bounce_velocity = 100;
+let ball_initial_bounce_velocity = null;
 let ball_current_velocity = 0;
 
 //generate segments
@@ -364,35 +364,32 @@ function draw() {
     case STATE_MOVING_IN_AIR:
       //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
       //velocity threshold to prevent drag from affecting slow moving ball, leading to infinite bounces
-      if (ball_current_velocity >= 4) {
-        let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
+      let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
-        ball_acceleration_x = drag.ax;
-        ball_acceleration_y = drag.ay - gravity;
-      } else {
-        ball_acceleration_x = 0;
-        ball_acceleration_y = -gravity;
-      }
+      ball_acceleration_x = drag.ax;
+      ball_acceleration_y = drag.ay - gravity;
 
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
 
       red_ball_velocity_y -= gravity * dt;
       check_collisions_in_flight(ball_x, ball_y);
-      //check_collisions(red_ball_x, red_ball_y);
-      //
-      console.log("ball current velocity:", ball_current_velocity)
-      console.log("ball_INITIAL_VELOCITY", ball_initial_bounce_velocity)
       break;
 
     case STATE_MOVING_ON_PLANE:
       //keep ball locked to ground plane, without this the ball would either levitate or fly up
       //ball_velocity_x *= plane_friction * dt;
       //check_collisions_on_plane(ball_x, ball_y);
-      //ball_velocity_y += -gravity * dt;
+      ball_velocity_y += -gravity * dt;
 
 
       check_collisions_in_flight(ball_x, ball_y);
+
+      if (check_hole_top(ball_x)) {
+        game_state = STATE_MOVING_IN_AIR;
+        ball_has_bounced = false;
+        ball_initial_bounce_velocity = null;
+      }
 
       break;
 
@@ -446,7 +443,7 @@ function reset_balls() {
   ball_has_bounced = false;
   num_ball_bounces = 0;
   ball_current_velocity = 0;
-  ball_initial_bounce_velocity = 100;
+  ball_initial_bounce_velocity = null;
 }
 
 function position_ball_to_triangle() {
