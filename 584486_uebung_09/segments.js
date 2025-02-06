@@ -14,18 +14,19 @@ function generate_segments() {
   };
 
   let hole_ground_segment = {
+    //add ball_d to y because 
+    name: "Hole ground segment",
     x1: -metric.right_rect_width,
-    y1: metric.hole_height,
+    y1: metric.hole_height + ball_d,
     x2: -metric.right_rect_width - metric.hole_width,
-    y2: metric.hole_height
+    y2: metric.hole_height + ball_d
   };
 
 
   let hole_left_segment = {
-    //add ball radius cuz bug
-    x1: -metric.right_rect_width - metric.hole_width + ball_d / 2,
+    x1: -metric.right_rect_width - metric.hole_width - ball_d,
     y1: metric.hole_height,
-    x2: -metric.right_rect_width - metric.hole_width + ball_d / 2,
+    x2: -metric.right_rect_width - metric.hole_width - ball_d,
     y2: metric.height
   };
 
@@ -37,6 +38,7 @@ function generate_segments() {
   };
 
   let obstacle_left_segment = {
+    name: "Obstacle left segment",
     x1: obstacle.x,
     y1: obstacle.y,
     x2: obstacle.x,
@@ -44,9 +46,11 @@ function generate_segments() {
   };
 
   let obstacle_right_segment = {
-    x1: obstacle.x + obstacle.width,
+    //add ball_d to y because 
+    name: "Obstacle right segment",
+    x1: obstacle.x + obstacle.width + ball_d,
     y1: obstacle.y,
-    x2: obstacle.x + obstacle.width,
+    x2: obstacle.x + obstacle.width + ball_d,
     y2: obstacle.y + obstacle.height,
   };
 
