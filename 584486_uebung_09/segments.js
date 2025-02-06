@@ -24,6 +24,7 @@ function generate_segments() {
 
 
   let hole_left_segment = {
+    name: "hole_left_segment",
     x1: -metric.right_rect_width - metric.hole_width - ball_d,
     y1: metric.hole_height,
     x2: -metric.right_rect_width - metric.hole_width - ball_d,
@@ -31,6 +32,7 @@ function generate_segments() {
   };
 
   let hole_right_segment = {
+    name: "hole_right_segment",
     x1: -metric.right_rect_width,
     y1: metric.hole_height,
     x2: -metric.right_rect_width,
@@ -54,6 +56,14 @@ function generate_segments() {
     y2: obstacle.y + obstacle.height,
   };
 
+  let obstacle_top_segment = {
+    name: "Obstacle top segment",
+    x1: obstacle.x,
+    y1: obstacle.y + obstacle.height,
+    x2: obstacle.x + obstacle.width,
+    y2: obstacle.y + obstacle.height,
+  }
+
   let wall_segment = {
     x1: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width,
     y1: metric.schornstein_height,
@@ -67,13 +77,12 @@ function generate_segments() {
     y2: triangle_coords.y3
   }
 
-  let segments = [ground_segment_left, ground_segment_right, hole_ground_segment, hole_left_segment, hole_right_segment, obstacle_left_segment, obstacle_right_segment, wall_segment, triangle_segment];
+  let segments = [ground_segment_left, ground_segment_right, hole_ground_segment, hole_left_segment, hole_right_segment, obstacle_left_segment, obstacle_right_segment, obstacle_top_segment, wall_segment, triangle_segment];
 
   return segments;
 }
 
 function get_segments_list() {
-
   return segments
 }
 

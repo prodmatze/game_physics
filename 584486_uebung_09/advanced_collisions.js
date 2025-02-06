@@ -24,22 +24,9 @@ function distance_to_segment(ball_x, ball_y, segment) {
   return dist(ball_x, ball_y, closestX, closestY);
 }
 
-/*
-function calculate_angle(ball_velocity_x, ball_velocity_y, segment) {
-
-  let velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y);
-  let velocity_vector = createVector(ball_velocity_x, ball_velocity_y);
-  let segment_vector = createVector(segment.x2 - segment.x1, segment.y2 - segment.y1)
-
-  let angle_velocity_segment = velocity_vector.angleBetween(segment_vector)
-
-  return { angle: degrees(angle_velocity_segment), velocity: velocity }
-}
-*/
-
 // Computes the collision time (t) within dt between a moving ball and a segment.
 // Returns an object with collision details if a collision occurs within dt, otherwise returns null.
-function computeCollisionTime(ball_x, ball_y, ball_vx, ball_vy, dt, segment) {
+function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
   const r = ball_d / 2;  // ball's radius
   let earliestT = dt + 1; // initialize with a value larger than dt
   let collisionInfo = null; // will hold info about the earliest collision
@@ -63,6 +50,7 @@ function computeCollisionTime(ball_x, ball_y, ball_vx, ball_vy, dt, segment) {
     // Determine the signed distance from the ball's center to the line.
     let diff = p5.Vector.sub(p0, segStart);
     let d0 = diff.dot(normal);
+    //let d0 = distance_to_segment(ball_x, ball_y, segment);
 
     // Compute the rate of change of this distance.
     let dv = v.dot(normal);
@@ -169,21 +157,10 @@ function computeCollisionTime(ball_x, ball_y, ball_vx, ball_vy, dt, segment) {
   }
 }
 
-
-function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
-  let edge_vector = createVector(segment.x2 - segment.x1, segment.y2 - segment.y1)
-  let orthogonal_edge_vector = createVector(-edge_vector.y, edge_vector.x).normalize();
-
-  let velocity_vector = createVector(ball_velocity_x, ball_velocity_y)
-  let reflected_velocity = p5.Vector.sub(velocity_vector, orthogonal_edge_vector.mult(2 * velocity_vector.dot(orthogonal_edge_vector)));
-
-  let reflection = { x: reflected_velocity.x, y: reflected_velocity.y, normal: orthogonal_edge_vector }
-  return reflection
-}
-
-function reflect_ball_test(ball_velocity_x, ball_velocity_y, normal) {
+function reflect_ball(ball_velocity_x, ball_velocity_y, normal) {
   let velocity_vector = createVector(ball_velocity_x, ball_velocity_y);
-  let n = normal.copy();  // Copy to avoid modifying the original normal
+  //copy to not modify original normal
+  let n = normal.copy();
   let dot = velocity_vector.dot(n);
   n.mult(2 * dot);
   let reflected_velocity = p5.Vector.sub(velocity_vector, n);
@@ -218,7 +195,7 @@ function triangle_collision(ball_x, ball_y) {
 }
 
 function check_hole_top(ball_x) {
-  if ((ball_x <= -metric.right_rect_width) && ball_x >= -metric.right_rect_width - metric.hole_width) {
+  if ((ball_x <= -metric.right_rect_width) && ball_x >= -metric.right_rect_width - metric.hole_width && ball_y - ball_d / 2 <= metric.height) {
     return true;
   } else {
     return false;
@@ -260,34 +237,9 @@ function update_velocity(ball_velocity_x, ball_velocity_y) {
 }
 
 
-
-function check_collisions_in_flight_(ball_x, ball_y) {
+function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
   for (let segment of segments) {
-    //let collision = detect_collision(ball_x, ball_y, segment);
-    let collision = computeCollisionTime(ball_x, ball_y, ball_velocity_x, ball_velocity_y, dt, segment);
-    if (collision) {
-      ball_x += ball_velocity_x * collision.t;
-      ball_y += ball_velocity_y * collision.t;
-
-      let reflection = reflect_ball_test(ball_velocity_x, ball_velocity_y, collision.normal);
-      ball_velocity_x = reflection.velocity_x * ball_bounce;
-      ball_velocity_y = reflection.velocity_y * ball_bounce;
-
-      let current_bounce_velocity = Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y);
-
-      let remaining_time = dt - collision.t;
-      ball_x += ball_velocity_x * remaining_time;
-      ball_y += ball_velocity_y * remaining_time;
-
-      update_game_state(current_bounce_velocity);
-      break;
-    }
-  }
-}
-
-function check_collisions_in_flight(ball_x, ball_y) {
-  for (let segment of segments) {
-    let collision = computeCollisionTime(ball_x, ball_y, ball_velocity_x, ball_velocity_y, dt, segment);
+    let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
     if (collision) {
 
       console.log("Collision Detected with segment: ", segment.name, "at:", segment)
@@ -295,13 +247,8 @@ function check_collisions_in_flight(ball_x, ball_y) {
       ball_x += ball_velocity_x * collision.t;
       ball_y += ball_velocity_y * collision.t;
 
-      // Optional: Nudge ball slightly out of the surface to avoid penetration issues.
-      const epsilon = 0.0001;
-      ball_x += collision.normal.x * epsilon;
-      ball_y += collision.normal.y * epsilon;
-
       // Reflect velocity
-      let reflection = reflect_ball_test(ball_velocity_x, ball_velocity_y, collision.normal);
+      let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, collision.normal);
       ball_velocity_x = reflection.velocity_x * ball_bounce;
       ball_velocity_y = reflection.velocity_y * ball_bounce;
 
@@ -310,14 +257,8 @@ function check_collisions_in_flight(ball_x, ball_y) {
       ball_x += ball_velocity_x * remaining_time;
       ball_y += ball_velocity_y * remaining_time;
 
-      // Check if the ball is nearly at rest, then "sleep" it
-      if (get_current_velocity(ball_velocity_x, ball_velocity_y) < 0.1) {
-        ball_velocity_x = 0;
-        ball_velocity_y = 0;
-      }
 
       update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
-
       break; // Exit after processing one collision.
     }
   }

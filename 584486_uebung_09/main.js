@@ -355,7 +355,6 @@ function draw() {
       ball_velocity_x -= spring_acceleration_x * dt
       ball_velocity_y -= spring_acceleration_y * dt
 
-      check_collisions_in_flight(ball_x, ball_y);
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
