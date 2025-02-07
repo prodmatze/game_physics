@@ -96,52 +96,56 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
   // Coefficient A is the squared magnitude of velocity.
   let A = ball_vx * ball_vx + ball_vy * ball_vy;
 
-  endpoints.forEach(function(ep) {
-    let dx = ball_x - ep.x;
-    let dy = ball_y - ep.y;
-    let B = 2 * (ball_vx * dx + ball_vy * dy);
-    let C = dx * dx + dy * dy - r * r;
+  if (Math.sqrt(ball_vx ** 2 + ball_vy ** 2) > 3)
 
-    let discriminant = B * B - 4 * A * C;
-    if (discriminant >= 0) { // Real solutions exist.
-      let sqrtDisc = Math.sqrt(discriminant);
-      // Two possible solutions:
-      let t1 = (-B - sqrtDisc) / (2 * A);
-      let t2 = (-B + sqrtDisc) / (2 * A);
 
-      // Choose the smallest positive t (collision must happen in the future).
-      let t_candidate = null;
-      if (t1 >= 0 && t1 <= dt) {
-        t_candidate = t1;
-      }
-      if (t2 >= 0 && t2 <= dt) {
-        if (t_candidate === null || t2 < t_candidate) {
-          t_candidate = t2;
+    endpoints.forEach(function(ep) {
+      let dx = ball_x - ep.x;
+      let dy = ball_y - ep.y;
+      let B = 2 * (ball_vx * dx + ball_vy * dy);
+      let C = dx * dx + dy * dy - r * r;
+
+      let discriminant = B * B - 4 * A * C;
+      if (discriminant >= 0) { // Real solutions exist.
+        let sqrtDisc = Math.sqrt(discriminant);
+        // Two possible solutions:
+        let t1 = (-B - sqrtDisc) / (2 * A);
+        let t2 = (-B + sqrtDisc) / (2 * A);
+
+        // Choose the smallest positive t (collision must happen in the future).
+        let t_candidate = null;
+        if (t1 >= 0 && t1 <= dt) {
+          t_candidate = t1;
+        }
+        if (t2 >= 0 && t2 <= dt) {
+          if (t_candidate === null || t2 < t_candidate) {
+            t_candidate = t2;
+          }
+        }
+
+        // If a candidate collision time is found and it's the earliest so far, update collisionInfo.
+        if (t_candidate !== null && t_candidate < earliestT) {
+          earliestT = t_candidate;
+          // Compute the collision point.
+          let collisionPoint = {
+            x: ball_x + ball_vx * t_candidate,
+            y: ball_y + ball_vy * t_candidate
+          };
+          // The normal is from the endpoint to the collision point.
+          let normalVec = createVector(collisionPoint.x - ep.x, collisionPoint.y - ep.y);
+          if (normalVec.mag() !== 0) {
+            normalVec.normalize();
+          }
+          collisionInfo = {
+            t: t_candidate,
+            normal: normalVec,
+            type: 'endpoint',
+            segment: segment
+          };
         }
       }
+    });
 
-      // If a candidate collision time is found and it's the earliest so far, update collisionInfo.
-      if (t_candidate !== null && t_candidate < earliestT) {
-        earliestT = t_candidate;
-        // Compute the collision point.
-        let collisionPoint = {
-          x: ball_x + ball_vx * t_candidate,
-          y: ball_y + ball_vy * t_candidate
-        };
-        // The normal is from the endpoint to the collision point.
-        let normalVec = createVector(collisionPoint.x - ep.x, collisionPoint.y - ep.y);
-        if (normalVec.mag() !== 0) {
-          normalVec.normalize();
-        }
-        collisionInfo = {
-          t: t_candidate,
-          normal: normalVec,
-          type: 'endpoint',
-          segment: segment
-        };
-      }
-    }
-  });
 
   // If we found a collision within the timestep, return the collision details.
   // You might also want to compute penetration here; at t the ball should be just touching, so penetration is ideally 0.
@@ -194,13 +198,6 @@ function triangle_collision(ball_x, ball_y) {
   }
 }
 
-function check_hole_top(ball_x) {
-  if ((ball_x <= -metric.right_rect_width) && ball_x >= -metric.right_rect_width - metric.hole_width && ball_y - ball_d / 2 <= metric.height) {
-    return true;
-  } else {
-    return false;
-  }
-}
 
 function detect_collision(ball_x, ball_y, segment) {
   const distance = distance_to_segment(ball_x, ball_y, segment)
@@ -241,6 +238,9 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
   for (let segment of segments) {
     let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
     if (collision) {
+      if (collision.type == "endpoint" && ball_current_velocity < 3) {
+        break;
+      }
 
       console.log("Collision Detected with segment: ", segment.name, "at:", segment)
       // Move ball to collision point
@@ -256,7 +256,6 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
       let remaining_time = dt - collision.t;
       ball_x += ball_velocity_x * remaining_time;
       ball_y += ball_velocity_y * remaining_time;
-
 
       update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
       break; // Exit after processing one collision.

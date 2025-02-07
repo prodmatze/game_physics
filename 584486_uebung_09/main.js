@@ -361,7 +361,7 @@ function draw() {
       break;
 
     case STATE_MOVING_IN_AIR:
-      //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
+      check_collisions_in_flight(ball_x, ball_y, dt);
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
       ball_acceleration_x = drag.ax;
@@ -370,30 +370,31 @@ function draw() {
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
 
-      red_ball_velocity_y -= gravity * dt;
-      check_collisions_in_flight(ball_x, ball_y, dt);
+      //red_ball_velocity_y -= gravity * dt;
       break;
 
     case STATE_MOVING_ON_PLANE:
-      //keep ball locked to ground plane, without this the ball would either levitate or fly up
-      //ball_velocity_x *= plane_friction * dt;
-      //check_collisions_on_plane(ball_x, ball_y);
-
-      if (ball_y < metric.height + ball_d / 2) {
+      check_collisions_in_flight(ball_x, ball_y);
+      //apply gravity if ball is higher than ground
+      if (ball_y > metric.height + ball_d / 2) {
         ball_velocity_y -= gravity * dt;
       } else {
         ball_y = metric.height + ball_d / 2;
         ball_velocity_y = 0;
+        ball_velocity_x *= plane_friction;
       }
 
-      check_collisions_in_flight(ball_x, ball_y);
 
+      //change state when ball rolls into hole
       if (check_hole_top(ball_x)) {
         game_state = STATE_MOVING_IN_AIR;
         ball_has_bounced = false;
         ball_initial_bounce_velocity = null;
       }
-
+      if (in_triangle_range(ball_x)) {
+        //implement TRIANGLE_STATE later
+        ball_velocity_x = 0;
+      }
       break;
 
     case STATE_END_MOVEMENT:
