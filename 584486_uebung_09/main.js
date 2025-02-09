@@ -280,8 +280,6 @@ function draw() {
   distance_ball_slingshot = dist(slingshot_metrics.center_x, slingshot_metrics.center_y, ball_x, ball_y);
 
   dt = deltaTime / 1000;
-  ball_x += ball_velocity_x * dt;
-  ball_y += ball_velocity_y * dt;
   ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
 
 
@@ -332,6 +330,8 @@ function draw() {
         ball_x = mx;
         ball_y = my;
       }
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
 
       break;
 
@@ -358,6 +358,8 @@ function draw() {
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
       break;
 
     case STATE_MOVING_IN_AIR:
@@ -369,6 +371,9 @@ function draw() {
 
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
+
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
 
       //red_ball_velocity_y -= gravity * dt;
       break;
@@ -395,6 +400,8 @@ function draw() {
         //implement TRIANGLE_STATE later
         ball_velocity_x = 0;
       }
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
       break;
 
     case STATE_END_MOVEMENT:

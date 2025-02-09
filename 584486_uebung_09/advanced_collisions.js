@@ -69,7 +69,9 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
 
         // Project the collision point onto the segment to see if the collision is with the segment's face.
         let proj = p5.Vector.sub(collisionPoint, segStart).dot(edge) / edgeSquaredLength;
-        if (proj >= 0 && proj <= 1) {
+        let epsilon = 0.01;
+        if (proj >= -epsilon && proj <= 1 + epsilon) {
+
           // Valid collision with the flat side of the segment.
           if (t_line < earliestT) {
             earliestT = t_line;
@@ -242,10 +244,15 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
         break;
       }
 
-      console.log("Collision Detected with segment: ", segment.name, "at:", segment)
+      console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
       // Move ball to collision point
       ball_x += ball_velocity_x * collision.t;
       ball_y += ball_velocity_y * collision.t;
+
+      if (collision.penetration) {
+        ball_x -= collision.normal.x * collision.penetration;
+        ball_y -= collision.normal.y * collision.penetration;
+      }
 
       // Reflect velocity
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, collision.normal);
@@ -258,6 +265,7 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
       ball_y += ball_velocity_y * remaining_time;
 
       update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
+
       break; // Exit after processing one collision.
     }
   }
