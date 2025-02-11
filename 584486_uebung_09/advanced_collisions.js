@@ -54,7 +54,7 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
     let dv = v.dot(normal);
 
     //check if ball is moving parallel to segment (implemented small tolerance value because of floating point precission)
-    if (Math.abs(dv) > 0.0001) { // Avoid numerical instability in low-speed cases
+    if (Math.abs(dv) > 0.0001) { //again for tolerance
 
       //get time of impact
       let t_line = (r - d0) / dv;
