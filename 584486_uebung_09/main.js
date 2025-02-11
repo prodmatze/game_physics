@@ -66,7 +66,7 @@ let segments = [];
 //after 7 bounces, the balls velocity equals 20% of its starting velocity
 let max_num_ball_bounces = 7;
 
-let plane_friction = 0.999;
+let plane_friction = 0.99;
 
 let gravity = 9.81;
 
@@ -378,6 +378,9 @@ function draw() {
       if (check_hole_top && ball_current_velocity <= 2) {
         if (ball_y - ball_d / 2 < metric.hole_height) {
           ball_y = metric.hole_height + ball_d / 2;
+          if (ball_velocity_x < 0.2) {
+            game_state = STATE_END_MOVEMENT;
+          }
         }
       }
 
@@ -406,11 +409,29 @@ function draw() {
         //implement TRIANGLE_STATE later
         ball_velocity_x = 0;
       }
+      ball_velocity_x *= plane_friction;
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
       break;
 
     case STATE_END_MOVEMENT:
+      ball_velocity_y = 0;
+      ball_y = metric.hole_height + ball_d / 2;
+
+      if (hole_right_failsafe(ball_x, ball_y)) {
+        ball_x = hole_right_failsafe(ball_x, ball_y);
+        ball_velocity_x = -ball_velocity_x * ball_bounce
+      }
+      if (hole_left_failsafe(ball_x, ball_y)) {
+        ball_x = hole_left_failsafe(ball_x, ball_y);
+        ball_velocity_x = -ball_velocity_x * ball_bounce
+      }
+
+      ball_velocity_x *= plane_friction;
+      ball_x += ball_velocity_x * dt;
+      if (ball_velocity_x < 0.05) {
+        ball_velocity_x = 0;
+      }
 
       break;
   }

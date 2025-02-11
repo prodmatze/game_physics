@@ -16,10 +16,10 @@ function generate_segments() {
   let hole_ground_segment = {
     //add ball_d to y because 
     name: "Hole ground segment",
-    x1: -metric.right_rect_width,
-    y1: metric.hole_height + ball_d,
-    x2: -metric.right_rect_width - metric.hole_width,
-    y2: metric.hole_height + ball_d
+    x2: -metric.right_rect_width,
+    y2: metric.hole_height,
+    x1: -metric.right_rect_width - metric.hole_width,
+    y1: metric.hole_height
   };
 
   let hole_left_segment = {
@@ -69,6 +69,7 @@ function generate_segments() {
     x2: -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width,
     y2: metric.height
   };
+
   let triangle_segment = {
     x1: triangle_coords.x1,
     y1: triangle_coords.y1,
