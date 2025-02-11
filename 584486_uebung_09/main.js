@@ -375,6 +375,12 @@ function draw() {
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
+      if (check_hole_top && ball_current_velocity <= 2) {
+        if (ball_y - ball_d / 2 < metric.hole_height) {
+          ball_y = metric.hole_height + ball_d / 2;
+        }
+      }
+
       //red_ball_velocity_y -= gravity * dt;
       break;
 
