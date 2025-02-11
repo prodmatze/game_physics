@@ -24,61 +24,57 @@ function distance_to_segment(ball_x, ball_y, segment) {
   return dist(ball_x, ball_y, closestX, closestY);
 }
 
-// Computes the collision time (t) within dt between a moving ball and a segment.
-// Returns an object with collision details if a collision occurs within dt, otherwise returns null.
+//get collision_time within current time frame
+//returns collision details if collision occurs, otherwise return null
 function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
-  const r = ball_d / 2;  // ball's radius
-  let earliestT = dt + 1; // initialize with a value larger than dt
-  let collisionInfo = null; // will hold info about the earliest collision
+  const r = ball_d / 2;
+  let earliest_t = dt + 1; //needs to be initialied bigger than dt
+  let collision_info = null; //return object
 
-  // Create vectors for the ball's starting point and ve
+  //get vectors for starting pos and velocity
   let p0 = createVector(ball_x, ball_y);
   let v = createVector(ball_vx, ball_vy);
 
-  // Create vectors for the segment endpoints
+  //get vectors for endpoints
   let segStart = createVector(segment.x1, segment.y1);
   let segEnd = createVector(segment.x2, segment.y2);
   let edge = p5.Vector.sub(segEnd, segStart);
   let edgeSquaredLength = edge.magSq();
 
-  // 1. Check collision with the infinite line (the flat side of the segment)
-  if (edgeSquaredLength !== 0) {  // avoid division by zero for degenerate segments
-    // Compute a perpendicular (normal) to the segment.
-    // Note: There are two normals; we need the one that the ball is approaching.
+  //1. check collisions on infinite segment
+  if (edgeSquaredLength !== 0) {  //sometimes segments get fcked up, so making sure here to not divide by 0
+    //get normal for the segment 
     let normal = createVector(-edge.y, edge.x).normalize();
 
-    // Determine the signed distance from the ball's center to the line.
+    //get distance from ball to segment
     let diff = p5.Vector.sub(p0, segStart);
     let d0 = diff.dot(normal);
-    //let d0 = distance_to_segment(ball_x, ball_y, segment);
 
-    // Compute the rate of change of this distance.
+    //delta V
     let dv = v.dot(normal);
 
-    // Only proceed if the ball is moving (dv != 0) and is approaching the line.
-    // (If dv is 0, the ball is moving parallel to the line, so no collision with the flat side.)
+    //check if ball is moving parallel to segment (implemented small tolerance value because of floating point precission)
     if (Math.abs(dv) > 0.0001) { // Avoid numerical instability in low-speed cases
 
-      // Solve for t such that: d0 + dv * t = r (when approaching the side)
-      // (This assumes the ball is coming from the side where the distance is > r.)
+      //get time of impact
       let t_line = (r - d0) / dv;
 
-      // Only consider t_line if it's in the future and within the current dt.
+      //only continue of t_line is in future and within dt (current timestep)
       if (t_line >= 0 && t_line <= dt) {
-        // Compute where the ball would be at time t_line.
-        let collisionPoint = p5.Vector.add(p0, p5.Vector.mult(v, t_line));
+        //get point of collsion (going out from t_line)
+        let collision_point = p5.Vector.add(p0, p5.Vector.mult(v, t_line));
 
-        // Project the collision point onto the segment to see if the collision is with the segment's face.
-        let proj = p5.Vector.sub(collisionPoint, segStart).dot(edge) / edgeSquaredLength;
+        //project collision_point onto segment to see if collision is with segments face
+        let proj = p5.Vector.sub(collision_point, segStart).dot(edge) / edgeSquaredLength;
         let epsilon = 0.01;
         if (proj >= -epsilon && proj <= 1 + epsilon) {
 
-          // Valid collision with the flat side of the segment.
-          if (t_line < earliestT) {
-            earliestT = t_line;
-            collisionInfo = {
+          //if t_line < earliest_t we have a valid collision
+          if (t_line < earliest_t) {
+            earliest_t = t_line;
+            collision_info = {
               t: t_line,
-              normal: normal.copy(), // normal at the point of collision
+              normal: normal.copy(), //collision normal
               type: 'line',
               segment: segment
             };
@@ -88,15 +84,15 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
     }
   }
 
-  // 2. Check collision with the endpoints.
-  // For each endpoint, we solve the quadratic:
-  //   (ball_x + ball_vx * t - ep_x)^2 + (ball_y + ball_vy * t - ep_y)^2 = r^2
+  // 2. check collision with edges
+  //solve quadratic for each endpoint:
+  //(ball_x + ball_vx * t - ep_x)^2 + (ball_y + ball_vy * t - ep_y)^2 = r^2
   let endpoints = [
     { x: segment.x1, y: segment.y1 },
     { x: segment.x2, y: segment.y2 }
   ];
 
-  // Coefficient A is the squared magnitude of velocity.
+  //A is squared magnitude of vel
   let A = ball_vx * ball_vx + ball_vy * ball_vy;
 
   if (Math.sqrt(ball_vx ** 2 + ball_vy ** 2) > 3)
@@ -106,17 +102,17 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
       let dx = ball_x - ep.x;
       let dy = ball_y - ep.y;
       let B = 2 * (ball_vx * dx + ball_vy * dy);
-      let epsilon = 0.001; // Small buffer for precision errors
+      let epsilon = 0.001; //small tolerance for floating point precision 
       let C = dx * dx + dy * dy - (r + epsilon) * (r + epsilon);
 
       let discriminant = B * B - 4 * A * C;
-      if (discriminant >= 0) { // Real solutions exist.
+      if (discriminant >= 0) { //if discriminant >= 0, solution exists
         let sqrtDisc = Math.sqrt(discriminant);
-        // Two possible solutions:
+        //two solutions:
         let t1 = (-B - sqrtDisc) / (2 * A);
         let t2 = (-B + sqrtDisc) / (2 * A);
 
-        // Choose the smallest positive t (collision must happen in the future).
+        //get smallest positive t 
         let t_candidate = null;
         if (t1 >= 0 && t1 <= dt) {
           t_candidate = t1;
@@ -127,22 +123,22 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
           }
         }
 
-        // If a candidate collision time is found and it's the earliest so far, update collisionInfo.
+        //update earliest_t
         if (t_candidate !== null && t_candidate >= 0 && t_candidate <= dt) {
-          earliestT = t_candidate;
-          // Compute the collision point.
-          let collisionPoint = {
+          earliest_t = t_candidate;
+          //get collision point
+          let collision_point = {
             x: ball_x + ball_vx * t_candidate,
             y: ball_y + ball_vy * t_candidate
           };
-          // The normal is from the endpoint to the collision point.
-          let normalVec = createVector(collisionPoint.x - ep.x, collisionPoint.y - ep.y);
-          if (normalVec.mag() !== 0) {
-            normalVec.normalize();
+          //normal is from endpoint to collision point
+          let normal_vec = createVector(collision_point.x - ep.x, collision_point.y - ep.y);
+          if (normal_vec.mag() !== 0) {
+            normal_vec.normalize();
           }
-          collisionInfo = {
+          collision_info = {
             t: t_candidate,
-            normal: normalVec,
+            normal: normal_vec,
             type: 'endpoint',
             segment: segment
           };
@@ -150,37 +146,33 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
       }
     });
 
-
-  // If we found a collision within the timestep, return the collision details.
-  // You might also want to compute penetration here; at t the ball should be just touching, so penetration is ideally 0.
-  if (collisionInfo && collisionInfo.t <= dt) {
-    // (Optional) compute a small penetration value due to floating-point precision.
-    let posAtCollisionX = ball_x + ball_vx * collisionInfo.t;
-    let posAtCollisionY = ball_y + ball_vy * collisionInfo.t;
-    let currentDist = distance_to_segment(posAtCollisionX, posAtCollisionY, segment);
-    collisionInfo.penetration = Math.max(0, r - currentDist);
-    return collisionInfo;
+  //get possible penetration here
+  if (collision_info && collision_info.t <= dt) {
+    let pos_at_collision_x = ball_x + ball_vx * collision_info.t;
+    let pos_at_collision_y = ball_y + ball_vy * collision_info.t;
+    let current_dist = distance_to_segment(pos_at_collision_x, pos_at_collision_y, segment);
+    collision_info.penetration = Math.abs(r - current_dist);
+    return collision_info;
   }
-  // If no collision was found, apply the fallback
-  let finalPos = createVector(ball_x + ball_vx * dt, ball_y + ball_vy * dt);
-  let closestPoint = closest_point_on_segment(finalPos, segment);
-  let fallbackNormal = p5.Vector.sub(finalPos, closestPoint);
+  //if no collision found, compute fallback
+  let final_pos = createVector(ball_x + ball_vx * dt, ball_y + ball_vy * dt);
+  let closest_point = closest_point_on_segment(final_pos, segment);
+  let fallback_normal = p5.Vector.sub(final_pos, closest_point);
 
-  // Normalize normal (avoid division errors)
-  if (fallbackNormal.magSq() !== 0) {
-    fallbackNormal.normalize();
+  if (fallback_normal.magSq() !== 0) {
+    fallback_normal.normalize();
   } else {
-    fallbackNormal = createVector(0, -1); // Default downward normal
+    fallback_normal = createVector(0, -1);
   }
 
-  let fallbackDist = p5.Vector.dist(finalPos, closestPoint);
+  let fallback_dist = p5.Vector.dist(final_pos, closest_point);
 
-  // If the ball is inside the segment after movement, force a correction
-  let groundThreshold = r * 0.01; // Allow small floating-point variations without triggering correction
-  if (fallbackDist < ball_d / 2 - groundThreshold) {
+  //if ball is inside segment, trigger correction
+  let ground_threshold = r * 0.01; //allow small threshold for floating point precisssion
+  if (fallback_dist < ball_d / 2 - ground_threshold) {
     return {
-      t: dt, // Apply correction immediately
-      normal: fallbackNormal,
+      t: dt, //entire timestep
+      normal: fallback_normal,
       type: 'fallback',
       segment: segment
     };
@@ -195,13 +187,13 @@ function closest_point_on_segment(point, segment) {
   let edge = p5.Vector.sub(segEnd, segStart);
   let edgeLengthSq = edge.magSq();
 
-  if (edgeLengthSq === 0) return segStart; // Avoid division by zero (if degenerate segment)
+  if (edgeLengthSq === 0) return segStart; //no 0 divisiion
 
-  // Project point onto the line segment
+  //project point on line
   let t = p5.Vector.sub(point, segStart).dot(edge) / edgeLengthSq;
-  t = Math.max(0, Math.min(1, t)); // Clamp t between 0 and 1 to stay within the segment
+  t = Math.max(0, Math.min(1, t)); //between 0-1 to stay on segment
 
-  return p5.Vector.add(segStart, p5.Vector.mult(edge, t)); // Closest point on segment
+  return p5.Vector.add(segStart, p5.Vector.mult(edge, t)); //closest point on segment
 }
 
 
@@ -257,7 +249,7 @@ function update_game_state(current_bounce_velocity) {
     ball_has_bounced = true;
     ball_initial_bounce_velocity = current_bounce_velocity;
   }
-  if (current_bounce_velocity <= (ball_initial_bounce_velocity * 0.1 && !check_hole_top(ball_x))) {
+  if ((current_bounce_velocity <= ball_initial_bounce_velocity * 0.1) && !check_hole_top(ball_x) && !in_triangle_range(ball_x)) {
     game_state = STATE_MOVING_ON_PLANE;
   }
 }
@@ -281,12 +273,9 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
   for (let segment of segments) {
     let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
     if (collision) {
-      if (collision.type == "endpoint" && ball_current_velocity < 3) {
-        break;
-      }
 
       console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
-      // Move ball to collision point
+      //move to point of collision
       ball_x += ball_velocity_x * collision.t;
       ball_y += ball_velocity_y * collision.t;
 
@@ -295,19 +284,19 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
         ball_y -= collision.normal.y * collision.penetration;
       }
 
-      // Reflect velocity
+      //reflect velocity
       let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, collision.normal);
       ball_velocity_x = reflection.velocity_x * ball_bounce;
       ball_velocity_y = reflection.velocity_y * ball_bounce;
 
-      // Process remaining time
+      //process remaining time
       let remaining_time = dt - collision.t;
       ball_x += ball_velocity_x * remaining_time;
       ball_y += ball_velocity_y * remaining_time;
 
       update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
 
-      break; // Exit after processing one collision.
+      break; //exit after one collision
     }
   }
 }

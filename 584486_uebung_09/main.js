@@ -375,13 +375,19 @@ function draw() {
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
-      if (check_hole_top && ball_current_velocity <= 2) {
+      if (check_hole_top(ball_x) && ball_current_velocity <= 2) {
         if (ball_y - ball_d / 2 < metric.hole_height) {
           ball_y = metric.hole_height + ball_d / 2;
           if (ball_velocity_x < 0.2) {
             game_state = STATE_END_MOVEMENT;
           }
         }
+      }
+      if (hole_right_failsafe(ball_x, ball_y)) {
+        ball_x = hole_right_failsafe(ball_x, ball_y);
+      }
+      if (hole_left_failsafe(ball_x, ball_y)) {
+        ball_x = hole_left_failsafe(ball_x, ball_y);
       }
 
       //red_ball_velocity_y -= gravity * dt;
