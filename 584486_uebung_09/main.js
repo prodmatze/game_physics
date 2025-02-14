@@ -80,7 +80,7 @@ const density_air = 1.3;
 
 //wind-speed
 //errechnet einmal pro spiel eine zufällige windgeschwindigkeit zwischen -25 und +25 m/s aus
-const wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
+let wind_speed = Math.floor(Math.random() * (25 - (-25) + 1)) - 25;
 
 const spring_constants = {
   n: 50,
@@ -158,10 +158,10 @@ var metric = {
 
   //important that right rectangle, left rectange, and hole add up to 100% of playground width to make playground symetric and centered
   right_rect_width: playground.width * 0.6,
-  left_rect_width: playground.width * 0.33,
+  left_rect_width: playground.width * 0.3,
 
-  hole_width: playground.width * 0.07,
-  hole_height: (playground.height * 0.1) / 2,
+  hole_width: playground.width * 0.1,
+  hole_height: (playground.height * 0.1) / 3,
 
   schornstein_height: playground.height * 0.5,
   schornstein_width: 0.2,
@@ -372,11 +372,8 @@ function draw() {
       ball_y += ball_velocity_y * dt;
 
       if (check_hole_top(ball_x) && ball_current_velocity <= 2) {
-        if (ball_y - ball_d / 2 < metric.hole_height) {
-          ball_y = metric.hole_height + ball_d / 2;
-          if (ball_velocity_x < 0.2) {
-            game_state = STATE_END_MOVEMENT;
-          }
+        if ((ball_y - ball_d / 2 < metric.height) && ball_velocity_y < 0.1) {
+          game_state = STATE_END_MOVEMENT;
         }
       }
       check_collisions_in_flight(ball_x, ball_y)
@@ -416,20 +413,25 @@ function draw() {
         score++;
       }
 
-      ball_velocity_y = 0;
-      ball_y = metric.hole_height + ball_d / 2;
-
-      if (hole_right_failsafe(ball_x, ball_y)) {
-        ball_x = hole_right_failsafe(ball_x, ball_y);
-        ball_velocity_x = -ball_velocity_x * ball_bounce
+      if (ball_current_velocity > 0.01) {
+        console.log("CURRENT VELOCITY: ", ball_current_velocity)
+        ball_velocity_y -= gravity * dt;
+        ball_velocity_x *= plane_friction;
+        ball_x += ball_velocity_x * dt;
+        ball_y += ball_velocity_y * dt;
+        check_collisions();
+      } else {
+        ball_velocity_y = 0;
+        ball_y = metric.hole_height + ball_d / 2;
       }
-      if (hole_left_failsafe(ball_x, ball_y)) {
-        ball_x = hole_left_failsafe(ball_x, ball_y);
-        ball_velocity_x = -ball_velocity_x * ball_bounce
-      }
-
-      ball_velocity_x *= plane_friction;
-      ball_x += ball_velocity_x * dt;
+      // if (hole_right_failsafe(ball_x, ball_y)) {
+      //   ball_x = hole_right_failsafe(ball_x, ball_y);
+      //   ball_velocity_x = -ball_velocity_x * ball_bounce
+      // }
+      // if (hole_left_failsafe(ball_x, ball_y)) {
+      //   ball_x = hole_left_failsafe(ball_x, ball_y);
+      //   ball_velocity_x = -ball_velocity_x * ball_bounce
+      // }
       if (ball_current_velocity < 0.2) {
         ball_velocity_x = 0;
       }
@@ -512,8 +514,9 @@ function test_ball_collision() {
 
 function test_ball_scoring() {
   reset_balls();
+  wind_speed = -19;
   game_state = STATE_MOVING_IN_AIR;
-  ball_x = -5;
+  ball_x = -5.5;
   ball_y = 2.5;
   ball_velocity_x = -3;
 }
