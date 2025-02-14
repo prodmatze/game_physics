@@ -1,18 +1,15 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.9 */
-/* Datum: 25.01.2025 */
+/* Übung Nr.10 */
+/* Datum: 14.02.2025 */
 
-function update_game_state() {
-  console.log("UPDATING GAME STATE!")
-  console.log("ball_has_bounced:", ball_has_bounced)
-  console.log("Current Velocity:", ball_current_velocity)
-  console.log("Initial Velocity", ball_initial_bounce_velocity)
-  ball_current_velocity = Math.sqrt(ball_velocity_x ** 2 + ball_velocity_y ** 2);
-  if (ball_has_bounced == false) {
-    console.log("Setting ball_has_bounced to true")
+function update_game_state(current_bounce_velocity) {
+  if (!ball_has_bounced) {
     ball_has_bounced = true;
-    (ball_initial_bounce_velocity = ball_current_velocity);
+    ball_initial_bounce_velocity = current_bounce_velocity;
+  }
+  if ((current_bounce_velocity <= ball_initial_bounce_velocity * 0.1) && !check_hole_top(ball_x) && !in_triangle_range(ball_x)) {
+    game_state = STATE_MOVING_ON_PLANE;
   }
 }
 
@@ -139,7 +136,7 @@ function triangle_collision(ball_x, ball_y) {
 }
 
 function check_hole_top(ball_x) {
-  if ((ball_x - ball_d / 2 <= -metric.right_rect_width) && ball_x + ball_d / 2 >= -metric.right_rect_width - metric.hole_width) {
+  if ((ball_x <= -metric.right_rect_width) && ball_x >= -metric.right_rect_width - metric.hole_width) {
     return true;
   } else {
     return false;

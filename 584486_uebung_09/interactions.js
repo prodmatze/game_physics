@@ -1,7 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.9 */
-/* Datum: 25.01.2025 */
+/* Übung Nr.10 */
+/* Datum: 14.02.2025 */
 
 
 function mousePressed() {

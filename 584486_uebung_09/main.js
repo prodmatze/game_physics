@@ -374,7 +374,8 @@ function draw() {
           }
         }
       }
-      check_collisions(ball_x, ball_y, dt);
+      check_collisions_in_flight(ball_x, ball_y)
+      check_collisions();
       //red_ball_velocity_y -= gravity * dt;
       break;
 
