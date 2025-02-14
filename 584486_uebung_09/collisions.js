@@ -3,15 +3,15 @@
 /* Übung Nr.10 */
 /* Datum: 14.02.2025 */
 
-function update_game_state(current_bounce_velocity) {
-  if (!ball_has_bounced) {
-    ball_has_bounced = true;
-    ball_initial_bounce_velocity = current_bounce_velocity;
-  }
-  if ((current_bounce_velocity <= ball_initial_bounce_velocity * 0.1) && !check_hole_top(ball_x) && !in_triangle_range(ball_x)) {
-    game_state = STATE_MOVING_ON_PLANE;
-  }
-}
+// function update_game_state(current_bounce_velocity) {
+//   if (!ball_has_bounced) {
+//     ball_has_bounced = true;
+//     ball_initial_bounce_velocity = current_bounce_velocity;
+//   }
+//   if ((current_bounce_velocity <= ball_initial_bounce_velocity * 0.1) && !check_hole_top(ball_x) && !in_triangle_range(ball_x)) {
+//     game_state = STATE_MOVING_ON_PLANE;
+//   }
+// }
 
 function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
   distance = dist(ball_0_x, ball_0_y, ball_1_x, ball_1_y);
@@ -173,13 +173,7 @@ function check_hole_right(ball_x, ball_y) {
   }
 }
 
-function reflect_ball(ball_velocity_x, ball_velocity_y, segment) {
-  return None
-
-}
-
 function check_collisions() {
-
   //ground collision for play_ball
   if (!check_hole_top(ball_x)) {
     if (ground_collision(ball_x, ball_y) && game_state != STATE_ON_CATAPULT) {
