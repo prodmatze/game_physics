@@ -95,56 +95,53 @@ function compute_collision_time(ball_x, ball_y, ball_vx, ball_vy, segment, dt) {
   //A is squared magnitude of vel
   let A = ball_vx * ball_vx + ball_vy * ball_vy;
 
-  if (Math.sqrt(ball_vx ** 2 + ball_vy ** 2) > 3)
+  endpoints.forEach(function(ep) {
+    let dx = ball_x - ep.x;
+    let dy = ball_y - ep.y;
+    let B = 2 * (ball_vx * dx + ball_vy * dy);
+    let epsilon = 0.001; //small tolerance for floating point precision 
+    let C = dx * dx + dy * dy - (r + epsilon) * (r + epsilon);
 
+    let discriminant = B * B - 4 * A * C;
+    if (discriminant >= 0) { //if discriminant >= 0, solution exists
+      let sqrtDisc = Math.sqrt(discriminant);
+      //two solutions:
+      let t1 = (-B - sqrtDisc) / (2 * A);
+      let t2 = (-B + sqrtDisc) / (2 * A);
 
-    endpoints.forEach(function(ep) {
-      let dx = ball_x - ep.x;
-      let dy = ball_y - ep.y;
-      let B = 2 * (ball_vx * dx + ball_vy * dy);
-      let epsilon = 0.001; //small tolerance for floating point precision 
-      let C = dx * dx + dy * dy - (r + epsilon) * (r + epsilon);
-
-      let discriminant = B * B - 4 * A * C;
-      if (discriminant >= 0) { //if discriminant >= 0, solution exists
-        let sqrtDisc = Math.sqrt(discriminant);
-        //two solutions:
-        let t1 = (-B - sqrtDisc) / (2 * A);
-        let t2 = (-B + sqrtDisc) / (2 * A);
-
-        //get smallest positive t 
-        let t_candidate = null;
-        if (t1 >= 0 && t1 <= dt) {
-          t_candidate = t1;
-        }
-        if (t2 >= 0 && t2 <= dt) {
-          if (t_candidate === null || t2 < t_candidate) {
-            t_candidate = t2;
-          }
-        }
-
-        //update earliest_t
-        if (t_candidate !== null && t_candidate >= 0 && t_candidate <= dt) {
-          earliest_t = t_candidate;
-          //get collision point
-          let collision_point = {
-            x: ball_x + ball_vx * t_candidate,
-            y: ball_y + ball_vy * t_candidate
-          };
-          //normal is from endpoint to collision point
-          let normal_vec = createVector(collision_point.x - ep.x, collision_point.y - ep.y);
-          if (normal_vec.mag() !== 0) {
-            normal_vec.normalize();
-          }
-          collision_info = {
-            t: t_candidate,
-            normal: normal_vec,
-            type: 'endpoint',
-            segment: segment
-          };
+      //get smallest positive t 
+      let t_candidate = null;
+      if (t1 >= 0 && t1 <= dt) {
+        t_candidate = t1;
+      }
+      if (t2 >= 0 && t2 <= dt) {
+        if (t_candidate === null || t2 < t_candidate) {
+          t_candidate = t2;
         }
       }
-    });
+
+      //update earliest_t
+      if (t_candidate !== null && t_candidate >= 0 && t_candidate <= dt) {
+        earliest_t = t_candidate;
+        //get collision point
+        let collision_point = {
+          x: ball_x + ball_vx * t_candidate,
+          y: ball_y + ball_vy * t_candidate
+        };
+        //normal is from endpoint to collision point
+        let normal_vec = createVector(collision_point.x - ep.x, collision_point.y - ep.y);
+        if (normal_vec.mag() !== 0) {
+          normal_vec.normalize();
+        }
+        collision_info = {
+          t: t_candidate,
+          normal: normal_vec,
+          type: 'endpoint',
+          segment: segment
+        };
+      }
+    }
+  });
 
   //get possible penetration here
   if (collision_info && collision_info.t <= dt) {
