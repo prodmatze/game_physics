@@ -1,7 +1,7 @@
 /* template GTAT2 Game Technology & Interactive Systems */
 /* Autor: Mathieu Wassmuth  */
-/* Übung Nr.9 */
-/* Datum: 25.01.2025 */
+/* Übung Nr.10 */
+/* Datum: 14.02.2025 */
 
 /* declarations */
 var canvasWidth = window.innerWidth;
@@ -41,6 +41,10 @@ let sring_force = 0;
 let launch_velocity = 0;
 let ball_velocity_x = 0;
 let ball_velocity_y = 0;
+
+let ball_acceleration_x = 0;
+let ball_acceleration_y = 0;
+
 let play_ball_is_in_hole = false;
 
 let red_ball_velocity_x = 0;
@@ -53,10 +57,10 @@ let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
 let ball_has_bounced = false;
-let ball_initial_bounce_velocity;
+let ball_initial_bounce_velocity = null;
 let ball_current_velocity = 0;
 
-let plane_friction = 0.999;
+let plane_friction = 0.99;
 
 let gravity = 9.81;
 
@@ -240,13 +244,6 @@ console.log('CURRENT GAME STATE:', game_state);
 /* run program */
 function draw() {
   background(255);
-  let triangle_segment = {
-    x1: triangle_coords.x1,
-    y1: triangle_coords.y1,
-    x2: triangle_coords.x3,
-    y2: triangle_coords.y3
-  }
-  calculate_angle(ball_velocity_x, ball_velocity_y, triangle_segment)
 
   /* administration */
   fill(0);
@@ -275,15 +272,13 @@ function draw() {
   distance_ball_slingshot = dist(slingshot_metrics.center_x, slingshot_metrics.center_y, ball_x, ball_y);
 
   dt = deltaTime / 1000;
-  ball_x += ball_velocity_x * dt;
-  ball_y += ball_velocity_y * dt;
+  ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
+
+
+
 
   red_ball_x += red_ball_velocity_x * dt;
   red_ball_y += red_ball_velocity_y * dt;
-
-  //calculate ball velocity for every frame (important for state change)
-  ball_current_velocity = Math.sqrt(ball_velocity_x ** 2 + ball_velocity_y ** 2);
-
   /* display */
   push();
 
@@ -327,6 +322,8 @@ function draw() {
         ball_x = mx;
         ball_y = my;
       }
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
 
       break;
 
@@ -353,37 +350,79 @@ function draw() {
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
       }
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
       break;
 
     case STATE_MOVING_IN_AIR:
-      //only calculate drag in STATE_MOVING_IN_AIR to reduce unnecessary calculations during the game
+      check_collisions(ball_x, ball_y, dt);
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
-      let ball_acceleration_x = drag.ax;
-      let ball_acceleration_y = drag.ay - gravity;
+      ball_acceleration_x = drag.ax;
+      ball_acceleration_y = drag.ay - gravity;
 
       ball_velocity_x += ball_acceleration_x * dt;
       ball_velocity_y += ball_acceleration_y * dt;
 
-      red_ball_velocity_y -= gravity * dt;
-      check_collisions();
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
 
-      if (ball_initial_bounce_velocity && (ball_current_velocity <= ball_initial_bounce_velocity * 0.1)) {
-        game_state = STATE_MOVING_ON_PLANE;
+      if (check_hole_top(ball_x) && ball_current_velocity <= 2) {
+        if (ball_y - ball_d / 2 < metric.hole_height) {
+          ball_y = metric.hole_height + ball_d / 2;
+          if (ball_velocity_x < 0.2) {
+            game_state = STATE_END_MOVEMENT;
+          }
+        }
       }
-
+      //red_ball_velocity_y -= gravity * dt;
       break;
 
     case STATE_MOVING_ON_PLANE:
-      //keep ball locked to ground plane, without this the ball would either levitate or fly up
-      ball_velocity_y -= gravity * dt;
-      ball_velocity_x *= plane_friction;
-      red_ball_velocity_y -= gravity * dt;
+      check_collisions(ball_x, ball_y);
+      //apply gravity if ball is higher than ground
+      if (ball_y > metric.height + ball_d / 2) {
+        ball_velocity_y -= gravity * dt;
+      } else {
+        ball_y = metric.height + ball_d / 2;
+        ball_velocity_y = 0;
+        ball_velocity_x *= plane_friction;
+      }
 
-      check_collisions();
+
+      //change state when ball rolls into hole
+      if (check_hole_top(ball_x)) {
+        game_state = STATE_MOVING_IN_AIR;
+        ball_has_bounced = false;
+        ball_initial_bounce_velocity = null;
+      }
+      if (in_triangle_range(ball_x)) {
+        //implement TRIANGLE_STATE later
+        ball_velocity_x = 0;
+      }
+      ball_velocity_x *= plane_friction;
+      ball_x += ball_velocity_x * dt;
+      ball_y += ball_velocity_y * dt;
       break;
 
     case STATE_END_MOVEMENT:
+      ball_velocity_y = 0;
+      ball_y = metric.hole_height + ball_d / 2;
+
+      if (hole_right_failsafe(ball_x, ball_y)) {
+        ball_x = hole_right_failsafe(ball_x, ball_y);
+        ball_velocity_x = -ball_velocity_x * ball_bounce
+      }
+      if (hole_left_failsafe(ball_x, ball_y)) {
+        ball_x = hole_left_failsafe(ball_x, ball_y);
+        ball_velocity_x = -ball_velocity_x * ball_bounce
+      }
+
+      ball_velocity_x *= plane_friction;
+      ball_x += ball_velocity_x * dt;
+      if (ball_velocity_x < 0.05) {
+        ball_velocity_x = 0;
+      }
 
       break;
   }
@@ -420,6 +459,8 @@ function reset_balls() {
   launch_velocity = 0;
   ball_velocity_x = 0;
   ball_velocity_y = 0;
+  ball_acceleration_x = 0;
+  ball_acceleration_y = 0;
   play_ball_is_in_hole = false;
 
   red_ball_x = -playground.width / 2 + 1;
@@ -428,7 +469,10 @@ function reset_balls() {
   red_ball_velocity_y = 0;
   red_ball_is_in_hole = false;
 
+  ball_has_bounced = false;
   num_ball_bounces = 0;
+  ball_current_velocity = 0;
+  ball_initial_bounce_velocity = null;
 }
 
 function position_ball_to_triangle() {
@@ -445,7 +489,7 @@ function position_ball_to_triangle() {
 function test_ball_collision() {
   reset_balls();
   direction = "left";
-  game_state = STATE_MOVING_IN_AIR;
+  game_state = STATE_MOVING_ON_PLANE;
   if (direction == "left") {
     ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
@@ -512,6 +556,15 @@ function display_info(mx, my) {
   y += 24;
 
   text(`Total Bounces: ${num_ball_bounces}`, x, y);
+  y += 24;
+
+  text(`Ball has BOUNCED: ${ball_has_bounced}`, x, y);
+  y += 24;
+
+  text(`Initial Bounce Velocity: ${ball_initial_bounce_velocity}`, x, y);
+  y += 24;
+
+  text(`Ball current Velocity : ${ball_current_velocity}`, x, y);
   y += 24;
 }
 
