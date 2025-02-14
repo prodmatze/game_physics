@@ -60,7 +60,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = null;
 let ball_current_velocity = 0;
 
-let plane_friction = 0.99;
+let plane_friction = 1;
 
 let gravity = 9.81;
 
@@ -355,7 +355,6 @@ function draw() {
       break;
 
     case STATE_MOVING_IN_AIR:
-      check_collisions(ball_x, ball_y, dt);
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
       ball_acceleration_x = drag.ax;
@@ -375,6 +374,7 @@ function draw() {
           }
         }
       }
+      check_collisions(ball_x, ball_y, dt);
       //red_ball_velocity_y -= gravity * dt;
       break;
 
@@ -388,7 +388,6 @@ function draw() {
         ball_velocity_y = 0;
         ball_velocity_x *= plane_friction;
       }
-
 
       //change state when ball rolls into hole
       if (check_hole_top(ball_x)) {
@@ -491,6 +490,7 @@ function test_ball_collision() {
   direction = "left";
   game_state = STATE_MOVING_ON_PLANE;
   if (direction == "left") {
+    red_ball_x = 8;
     ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
     ball_velocity_x = -2.5;
