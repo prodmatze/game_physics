@@ -68,7 +68,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
-let plane_friction = 1;
+let plane_friction = 0.99;
 
 let gravity = 9.81;
 
@@ -134,6 +134,9 @@ function setup() {
   style_button(test_score_button);
   test_score_button.mousePressed(test_ball_scoring);
 
+  show_info_button = createButton("Show Info");
+  style_button(show_info_button);
+  show_info_button.mousePressed(toggle_info);
   //button interactions
   reset_button.mousePressed(reset_game);
   new_button.mousePressed(new_attempt);
@@ -152,6 +155,16 @@ const playground = {
   height: 7,  //in m
   width: 10,  //in m
 };
+
+let show_info = false;
+
+function toggle_info() {
+  if (!show_info) {
+    show_info = true;
+  } else {
+    show_info = false;
+  }
+}
 
 var M = (canvasWidth - 2 * padding) / (playground.width);
 var x0 = playground.width + padding;
@@ -402,6 +415,10 @@ function draw() {
       check_collisions();
       //red_ball_velocity_y -= gravity * dt;
       update_end_state(ball_current_velocity);
+
+      if (ball_y < -10) {
+        game_state = STATE_END_MOVEMENT;
+      }
       break;
 
     case STATE_MOVING_ON_PLANE:
@@ -451,7 +468,7 @@ function draw() {
         }
       }
 
-      if (remaining_attempts == 0 && !game_ended) {
+      if (remaining_attempts <= 0 && !game_ended) {
         game_ended = true;
         alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
       }
@@ -461,8 +478,9 @@ function draw() {
   }
   pop();
 
-  display_info(mx, my);
-
+  if (show_info) {
+    display_info(mx, my);
+  }
 }
 
 function new_attempt() {
@@ -537,6 +555,7 @@ function test_ball_collision() {
 
 function test_ball_scoring() {
   reset_balls();
+  remaining_attempts -= 1;
   wind_speed = -19;
   game_state = STATE_MOVING_IN_AIR;
   ball_x = -5.5;
@@ -547,10 +566,11 @@ function test_ball_scoring() {
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
-  test_score_button.position(canvasWidth - padding - 120, canvasHeight / 2 - padding * 0.8);
+  test_score_button.position(canvasWidth - padding * 3, padding);
   test_triangle_button.position(canvasWidth / 5, canvasHeight - padding * 0.8);
   test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
   position_obstacle_button.position(canvasWidth - padding - 400, canvasHeight - padding * 0.8)
+  show_info_button.position(padding + 50, padding)
 }
 
 function mouseX_to_internal(mouse_x) {
@@ -610,6 +630,7 @@ function display_info(mx, my) {
   text(`Ball current Velocity : ${ball_current_velocity}`, x, y);
   y += 24;
 }
+
 
 /* isr */
 function windowResized() {						/* responsive design */

@@ -41,7 +41,7 @@ function hole_ground_collision(ball_y) {
 }
 
 function wall_collision(ball_x, ball_y) {
-  if ((ball_x - ball_d / 2) <= (-metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width) && (ball_y < metric.schornstein_height + ball_d)) {
+  if ((ball_x - ball_d / 2) <= (-metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width) && (ball_y + ball_d / 2 < metric.schornstein_height)) {
     return true;
   }
   else {
