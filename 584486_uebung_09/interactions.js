@@ -27,7 +27,6 @@ function mouseDragged() {
     );
 
     ball_angle = atan2(distance_ball_slingshot_y, distance_ball_slingshot_x);
-    console.log(`Ball Angle: ${degrees(ball_angle).toFixed(2)}`);
 
     if (distance > max_radius) {
       distance = max_radius;

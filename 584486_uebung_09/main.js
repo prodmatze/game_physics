@@ -61,7 +61,7 @@ let bounce_velocity_threshold = 1;
 let num_ball_bounces = 0;
 
 let ball_has_bounced = false;
-let ball_initial_bounce_velocity = null;
+let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
 let plane_friction = 0.99;
@@ -247,6 +247,22 @@ let my;
 
 let info_panel_width = 200;
 
+function update_end_state(ball_current_velocity) {
+  if (check_hole_top(ball_x)) {
+    if (ball_current_velocity < 0.01 || num_ball_bounces > 10) {
+      console.log("SWITCHING NOW!!");
+      game_state = STATE_END_MOVEMENT;
+    }
+  }
+  if (game_state == STATE_MOVING_ON_PLANE) {
+    if (ball_current_velocity < 0.01) {
+      console.log("SWITCHING NOW!!");
+      game_state = STATE_END_MOVEMENT;
+    }
+
+  }
+}
+
 console.log('CURRENT GAME STATE:', game_state);
 
 /* run program */
@@ -291,8 +307,13 @@ function draw() {
   //scale entire coordinate system so i dont have to calculate M into every object
   scale(M, -M);
 
+  // stroke('magenta');
+  // strokeWeight(0.05);
+  // line(-9, metric.hole_height, -5, metric.hole_height);
+
   draw_scene(wind_speed);
   segments = generate_segments();
+
 
   switch (game_state) {
     case STATE_START:
@@ -320,7 +341,6 @@ function draw() {
 
         endShape(CLOSE);
         let angle_of_attack = atan2(ball_y - slingshot_metrics.center_y, ball_x - slingshot_metrics.center_x)
-        console.log(angle_of_attack)
 
       }
       if (can_drag_ball) {
@@ -371,14 +391,10 @@ function draw() {
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
-      if (check_hole_top(ball_x) && ball_current_velocity <= 2) {
-        if ((ball_y - ball_d / 2 < metric.height) && ball_velocity_y < 0.1) {
-          game_state = STATE_END_MOVEMENT;
-        }
-      }
       check_collisions_in_flight(ball_x, ball_y)
       check_collisions();
       //red_ball_velocity_y -= gravity * dt;
+      update_end_state(ball_current_velocity);
       break;
 
     case STATE_MOVING_ON_PLANE:
@@ -396,7 +412,7 @@ function draw() {
       if (check_hole_top(ball_x)) {
         game_state = STATE_MOVING_IN_AIR;
         ball_has_bounced = false;
-        ball_initial_bounce_velocity = null;
+        ball_initial_bounce_velocity = 0;
       }
       if (in_triangle_range(ball_x)) {
         //implement TRIANGLE_STATE later
@@ -405,36 +421,23 @@ function draw() {
       ball_velocity_x *= plane_friction;
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
+      update_end_state(ball_current_velocity);
       break;
 
     case STATE_END_MOVEMENT:
+      // if (check_hole_top(ball_x) && ball_y - ball_d / 2 > metric.hole_height) {
+      //   ball_velocity_y -= gravity * dt;
+      //   ball_y += ball_velocity_y * dt;
+      //
+      //
+      // }
+
       if (!scored) {
         scored = true;
         score++;
       }
 
-      if (ball_current_velocity > 0.01) {
-        console.log("CURRENT VELOCITY: ", ball_current_velocity)
-        ball_velocity_y -= gravity * dt;
-        ball_velocity_x *= plane_friction;
-        ball_x += ball_velocity_x * dt;
-        ball_y += ball_velocity_y * dt;
-        check_collisions();
-      } else {
-        ball_velocity_y = 0;
-        ball_y = metric.hole_height + ball_d / 2;
-      }
-      // if (hole_right_failsafe(ball_x, ball_y)) {
-      //   ball_x = hole_right_failsafe(ball_x, ball_y);
-      //   ball_velocity_x = -ball_velocity_x * ball_bounce
-      // }
-      // if (hole_left_failsafe(ball_x, ball_y)) {
-      //   ball_x = hole_left_failsafe(ball_x, ball_y);
-      //   ball_velocity_x = -ball_velocity_x * ball_bounce
-      // }
-      if (ball_current_velocity < 0.2) {
-        ball_velocity_x = 0;
-      }
+
 
       break;
   }
@@ -481,7 +484,7 @@ function reset_balls() {
   ball_has_bounced = false;
   num_ball_bounces = 0;
   ball_current_velocity = 0;
-  ball_initial_bounce_velocity = null;
+  ball_initial_bounce_velocity = 0;
   scored = false;
 }
 

@@ -25,10 +25,6 @@ function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
 
 function ground_collision(ball_x, ball_y) {
   if ((ball_y - ball_d / 2 <= metric.height) && (ball_x < 0) && (ball_x > -metric.right_rect_width - metric.left_rect_width - metric.hole_width)) {
-    if (ball_has_bounced == false) {
-      (ball_initial_bounce_velocity = ball_current_velocity)
-    }
-    update_game_state();
     return true;
   }
   else {
@@ -62,7 +58,6 @@ function obstacle_collision_left(ball_x, ball_y) {
   };
   const distance_obstacle_left = distance_to_segment(ball_x, ball_y, segment_obstacle_left)
   if (distance_obstacle_left <= ball_d / 2) {
-    console.log("OBSTACLE COLLISION LEFT!")
     return true;
   } else {
     return false;
@@ -78,7 +73,6 @@ function obstacle_collision_right(ball_x, ball_y) {
   };
   const distance_obstacle_right = distance_to_segment(ball_x, ball_y, segment_obstacle_right);
   if (distance_obstacle_right <= ball_d / 2) {
-    console.log("OBSTACLE COLLISION RIGHT!")
     return true;
   } else {
     return false;
@@ -179,7 +173,6 @@ function check_collisions() {
     if (ground_collision(ball_x, ball_y) && game_state != STATE_ON_CATAPULT) {
       if (game_state == STATE_MOVING_IN_AIR) {
         ball_y = metric.height + ball_d / 2;
-        console.log("GROUND COLLISION!", "BOUNCING BALL", ball_velocity_y)
         ball_velocity_y = -ball_velocity_y * ball_bounce;
         ball_velocity_x *= ball_bounce
         num_ball_bounces += 1;
@@ -194,6 +187,7 @@ function check_collisions() {
     if (hole_ground_collision(ball_y)) {
       if (game_state == STATE_MOVING_IN_AIR) {
         console.log("PLAYBALL BALL GROUND COLLISION AT: ", Math.abs(ball_velocity_y))
+        ball_y = metric.hole_height + ball_d / 2;
         ball_velocity_y = -ball_velocity_y * ball_bounce;
         ball_velocity_y += gravity * dt;
         num_ball_bounces += 1;
