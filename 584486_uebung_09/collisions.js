@@ -130,7 +130,7 @@ function triangle_collision(ball_x, ball_y) {
 }
 
 function check_hole_top(ball_x) {
-  if ((ball_x <= -metric.right_rect_width) && ball_x >= -metric.right_rect_width - metric.hole_width) {
+  if ((ball_x - ball_d / 2 < -metric.right_rect_width) && ball_x + ball_d / 2 > -metric.right_rect_width - metric.hole_width) {
     return true;
   } else {
     return false;
@@ -189,7 +189,7 @@ function check_collisions() {
         console.log("PLAYBALL BALL GROUND COLLISION AT: ", Math.abs(ball_velocity_y))
         ball_y = metric.hole_height + ball_d / 2;
         ball_velocity_y = -ball_velocity_y * ball_bounce;
-        ball_velocity_y += gravity * dt;
+        ball_velocity_y -= gravity * dt;
         num_ball_bounces += 1;
       } else {
         ball_velocity_x *= plane_friction;
@@ -197,13 +197,15 @@ function check_collisions() {
         ball_velocity_y = 0;
       }
     }
-    if (check_hole_left(ball_x, ball_y)) {
-      ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
-      ball_velocity_x = -ball_velocity_x * ball_bounce;
-    }
-    if (check_hole_right(ball_x, ball_y)) {
-      ball_x = -metric.right_rect_width - ball_d / 2;
-      ball_velocity_x = -ball_velocity_x * ball_bounce;
+    if (check_hole_top) {
+      if (check_hole_left(ball_x, ball_y)) {
+        ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
+        ball_velocity_x = -ball_velocity_x * ball_bounce;
+      }
+      if (check_hole_right(ball_x, ball_y)) {
+        ball_x = -metric.right_rect_width - ball_d / 2;
+        ball_velocity_x = -ball_velocity_x * ball_bounce;
+      }
     }
   }
   //ground collision for red_ball

@@ -106,3 +106,63 @@ function draw_scene(wind_speed) {
 	//playball
 	draw_circle(ball_x, ball_y, ball_d, "#0000ff");
 }
+
+
+function random_interval(min, max) { // min and max included 
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+class Particle {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+		this.vx = random_interval(-7, 7); // Random horizontal movement
+		this.vy = random_interval(-7, 7); // Random upward movement
+		this.alpha = 255; // Fully visible initially
+		//this.size = random_interval(0.001, 0.1); // Smaller size range
+		this.size = Math.random() * 0.2; // Smaller size range
+		this.color = color(random_interval(200, 255), random_interval(200, 220), random_interval(50, 100), this.alpha); // Bright colors with transparency
+	}
+
+	update() {
+		this.x += this.vx * dt;
+		this.y += this.vy * dt;
+		this.alpha -= random_interval(3, 7); // Slow fade instead of instant disappearance
+		this.size *= random_interval(0.8, 0.9); // Gradually shrink particles
+	}
+
+	show() {
+		noStroke();
+		fill(this.color.levels[0], this.color.levels[1], this.color.levels[2], this.alpha);
+		ellipse(this.x, this.y, this.size);
+	}
+
+	is_finished() {
+		if (this.alpha <= 1) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+}
+
+function spawn_particles(x, y, num_particles) {
+	let particles = []
+	for (let i = 0; i < num_particles; i++) {
+		particles.push(new Particle(x, y));
+	}
+	return particles
+}
+
+function draw_particles(particles) {
+	for (let i = particles.length - 1; i >= 0; i--) {
+		particles[i].update();
+		particles[i].show();
+
+		console.log(particles[i])
+
+		if (particles[i].is_finished()) {
+			particles.splice(i, 1);
+		}
+	}
+}

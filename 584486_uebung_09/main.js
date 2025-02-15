@@ -29,6 +29,10 @@ const STATE_MOVING_ON_PLANE = "Moving on Plane";
 const STATE_END_MOVEMENT = "End";
 
 let scored = false;
+let ball_stopped = false;
+let failed_attempts = 0;
+
+let game_ended = false;
 
 let game_state = STATE_START;
 
@@ -64,7 +68,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
-let plane_friction = 0.99;
+let plane_friction = 1;
 
 let gravity = 9.81;
 
@@ -265,6 +269,8 @@ function update_end_state(ball_current_velocity) {
 
 console.log('CURRENT GAME STATE:', game_state);
 
+let particles_1 = []
+let particles_2 = [];
 /* run program */
 function draw() {
   background(255);
@@ -374,6 +380,7 @@ function draw() {
 
       if (spring_displacement <= 0) {
         game_state = STATE_MOVING_IN_AIR;
+        remaining_attempts -= 1;
       }
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
@@ -425,18 +432,29 @@ function draw() {
       break;
 
     case STATE_END_MOVEMENT:
-      // if (check_hole_top(ball_x) && ball_y - ball_d / 2 > metric.hole_height) {
-      //   ball_velocity_y -= gravity * dt;
-      //   ball_y += ball_velocity_y * dt;
-      //
-      //
-      // }
+      if (check_hole_top(ball_x)) {
+        if (!scored) {
+          scored = true;
+          score++;
+          particles_1 = spawn_particles(ball_x, ball_y, 40);
+          particles_2 = spawn_particles(-playground.width / 2, playground.height / 2, 200);
 
-      if (!scored) {
-        scored = true;
-        score++;
+        }
+        draw_particles(particles_1);
+        //draw_particles(particles_2);
+
+      } else {
+        if (!ball_stopped) {
+          ball_stopped = true;
+          failed_attempts++;
+          console.log(failed_attempts);
+        }
       }
 
+      if (remaining_attempts == 0 && !game_ended) {
+        game_ended = true;
+        alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
+      }
 
 
       break;
@@ -450,7 +468,6 @@ function draw() {
 function new_attempt() {
   console.log("New attempt button was pressed!")
   if (remaining_attempts > 0) {
-    remaining_attempts -= 1;
     reset_balls();
     game_state = STATE_START;
   }
@@ -459,6 +476,7 @@ function new_attempt() {
 function reset_game() {
   console.log("Reset game button was pressed!")
   score = 0;
+  failed_attempts = 0;
   remaining_attempts = 5;
   reset_balls();
   game_state = STATE_START;
@@ -486,6 +504,8 @@ function reset_balls() {
   ball_current_velocity = 0;
   ball_initial_bounce_velocity = 0;
   scored = false;
+  ball_stopped = false;
+  game_ended = false;
 }
 
 function position_ball_to_triangle() {
@@ -530,7 +550,7 @@ function position_buttons() {
   test_score_button.position(canvasWidth - padding - 120, canvasHeight / 2 - padding * 0.8);
   test_triangle_button.position(canvasWidth / 5, canvasHeight - padding * 0.8);
   test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
-  position_obstacle_button.position(padding + metric.right_rect_width / 2 + metric.left_rect_width + metric.hole_width, canvasHeight / 2)
+  position_obstacle_button.position(canvasWidth - padding - 400, canvasHeight - padding * 0.8)
 }
 
 function mouseX_to_internal(mouse_x) {
@@ -569,7 +589,7 @@ function display_info(mx, my) {
   text(`Ball Angle: ${degrees(ball_angle).toFixed(2)}°`, x, y);
   y += 24;
 
-  text(`Mouse X: ${floor(mx)} - Mouse Y: ${floor(my)}`, x, y);
+  text(`Mouse X: ${mx} - Mouse Y: ${my}`, x, y);
   y += 24;
 
   text(`Current State: ${game_state}`, x, y);
