@@ -68,7 +68,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
-let plane_friction = 0.99;
+let plane_friction = 1;
 
 let gravity = 9.81;
 
