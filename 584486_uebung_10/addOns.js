@@ -116,18 +116,18 @@ class Particle {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
-		this.vx = random_interval(-7, 7); // Random horizontal movement
-		this.vy = random_interval(-7, 7); // Random upward movement
+		this.vx = random_interval(-8, 8); // Random horizontal movement
+		this.vy = random_interval(-8, 8); // Random upward movement
 		this.alpha = 255; // Fully visible initially
 		//this.size = random_interval(0.001, 0.1); // Smaller size range
-		this.size = Math.random() * 0.2; // Smaller size range
+		this.size = Math.random() * 0.35; // Smaller size range
 		this.color = color(random_interval(200, 255), random_interval(200, 220), random_interval(50, 100), this.alpha); // Bright colors with transparency
 	}
 
 	update() {
 		this.x += this.vx * dt;
 		this.y += this.vy * dt;
-		this.alpha -= random_interval(3, 7); // Slow fade instead of instant disappearance
+		this.alpha -= random_interval(2, 7); // Slow fade instead of instant disappearance
 		this.size *= random_interval(0.8, 0.9); // Gradually shrink particles
 	}
 

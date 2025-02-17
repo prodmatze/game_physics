@@ -13,7 +13,7 @@ const padding = 100;
 //game meta variables
 let score = 0;
 let remaining_attempts = 5;
-let status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
+let status_text = `Score: ${score} \n Remaining attempts: ${remaining_attempts}`;
 let dt = 0;
 
 let min_radius = 0.3;
@@ -33,6 +33,7 @@ let ball_stopped = false;
 let failed_attempts = 0;
 
 let is_first_shot = true;
+let is_last_shot = false;
 
 let game_ended = false;
 
@@ -297,10 +298,12 @@ function draw() {
   position_buttons();
 
   //status text
-  if (remaining_attempts > 0) {
-    status_text = `⛳ Score: ${score} - Remaining attempts: ${remaining_attempts} 🏌️`;
-  } else {
-    status_text = `⛳ Score: ${score} - No remaining attempts! 😔`
+  if (!game_ended) {
+    if (remaining_attempts > 0) {
+      status_text = ` Remaining attempts: ${remaining_attempts}  \n \n⛳ Score: ${score} 🏌️`;
+    } else {
+      status_text = `No more attempts! \n \n⛳ Score: ${score} 🏌️`
+    }
   }
 
   textAlign(CENTER, TOP);
@@ -343,6 +346,9 @@ function draw() {
   // strokeWeight(0.005);
   // line(ball_x + ball_d / 2 + 0.1, metric.height, -metric.right_rect_width - metric.hole_width, metric.height)
 
+  if (remaining_attempts == 1) {
+    is_last_shot = true;
+  }
 
   switch (game_state) {
     case STATE_START:
@@ -407,7 +413,6 @@ function draw() {
       if (spring_displacement <= 0) {
         if (is_first_shot) {
           remaining_attempts -= 1;
-          is_first_shot = false;
         }
         game_state = STATE_MOVING_IN_AIR;
       }
@@ -472,7 +477,7 @@ function draw() {
         if (!scored) {
           scored = true;
           score++;
-          particles_1 = spawn_particles(ball_x, ball_y, 40);
+          particles_1 = spawn_particles(ball_x, ball_y, 60);
           particles_2 = spawn_particles(-playground.width / 2, playground.height / 2, 200);
 
           pop();
@@ -488,13 +493,17 @@ function draw() {
       } else {
         if (!ball_stopped) {
           ball_stopped = true;
-          failed_attempts++;
+
           console.log(failed_attempts);
+          if (is_last_shot) {
+            failed_attempts++;
+          }
         }
       }
 
       if (remaining_attempts <= 0 && !game_ended) {
         game_ended = true;
+        status_text = "Reset the game to play again!"
         alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
       }
 
@@ -510,13 +519,14 @@ function draw() {
 
 function new_attempt() {
   console.log("New attempt button was pressed!")
-  remaining_attempts -= 1;
   if (!scored) {
     failed_attempts += 1;
   }
   if (remaining_attempts > 0) {
     reset_balls();
     game_state = STATE_START;
+  } else {
+    alert("Sorry, you don't have any remaining attempts.")
   }
 }
 
@@ -525,6 +535,7 @@ function reset_game() {
   score = 0;
   failed_attempts = 0;
   remaining_attempts = 5;
+  is_first_shot = true;
   reset_balls();
   game_state = STATE_START;
 }
