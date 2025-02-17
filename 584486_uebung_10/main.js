@@ -32,6 +32,8 @@ let scored = false;
 let ball_stopped = false;
 let failed_attempts = 0;
 
+let is_first_shot = true;
+
 let game_ended = false;
 
 let game_state = STATE_START;
@@ -68,7 +70,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
-let plane_friction = 1;
+let plane_friction = 0.99;
 
 let gravity = 9.81;
 
@@ -266,7 +268,7 @@ let info_panel_width = 200;
 
 function update_end_state(ball_current_velocity) {
   if (check_hole_top(ball_x)) {
-    if (ball_current_velocity < 0.01 || num_ball_bounces > 10) {
+    if (ball_current_velocity < 0.01 || num_ball_bounces > 15) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
@@ -318,8 +320,12 @@ function draw() {
 
   red_ball_x += red_ball_velocity_x * dt;
   red_ball_y += red_ball_velocity_y * dt;
+
+
   /* display */
   push();
+
+
 
   translate(canvasWidth - padding, canvasHeight - padding);
 
@@ -333,6 +339,10 @@ function draw() {
   draw_scene(wind_speed);
   segments = generate_segments();
 
+  // stroke("magenta");
+  // strokeWeight(0.005);
+  // line(ball_x + ball_d / 2 + 0.1, metric.height, -metric.right_rect_width - metric.hole_width, metric.height)
+
 
   switch (game_state) {
     case STATE_START:
@@ -342,6 +352,9 @@ function draw() {
         noFill();
         stroke(0, 0, 255);
         strokeWeight(1 / M);
+
+        text("asjdasdja", -3, 5);
+
 
         //draw_min radius circle 
         ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, min_radius * 2, min_radius * 2);
@@ -392,8 +405,11 @@ function draw() {
       ball_velocity_y -= spring_acceleration_y * dt
 
       if (spring_displacement <= 0) {
+        if (is_first_shot) {
+          remaining_attempts -= 1;
+          is_first_shot = false;
+        }
         game_state = STATE_MOVING_IN_AIR;
-        remaining_attempts -= 1;
       }
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
@@ -415,6 +431,8 @@ function draw() {
       check_collisions();
       //red_ball_velocity_y -= gravity * dt;
       update_end_state(ball_current_velocity);
+
+
 
       if (ball_y < -10) {
         game_state = STATE_END_MOVEMENT;
@@ -441,6 +459,7 @@ function draw() {
       if (in_triangle_range(ball_x)) {
         //implement TRIANGLE_STATE later
         ball_velocity_x = 0;
+        game_state = STATE_END_MOVEMENT;
       }
       ball_velocity_x *= plane_friction;
       ball_x += ball_velocity_x * dt;
@@ -455,6 +474,12 @@ function draw() {
           score++;
           particles_1 = spawn_particles(ball_x, ball_y, 40);
           particles_2 = spawn_particles(-playground.width / 2, playground.height / 2, 200);
+
+          pop();
+          trigger_goal_text();
+          draw_goal_text();
+          push();
+
 
         }
         draw_particles(particles_1);
@@ -485,6 +510,10 @@ function draw() {
 
 function new_attempt() {
   console.log("New attempt button was pressed!")
+  remaining_attempts -= 1;
+  if (!scored) {
+    failed_attempts += 1;
+  }
   if (remaining_attempts > 0) {
     reset_balls();
     game_state = STATE_START;
@@ -629,6 +658,59 @@ function display_info(mx, my) {
 
   text(`Ball current Velocity : ${ball_current_velocity}`, x, y);
   y += 24;
+}
+
+let goal_text = {
+  active: false,
+  size: 20,
+  max_size: 60,
+  x: null,
+  y: null,
+  alpha: 255,
+  growing: true
+}
+
+function draw_goal_text() {
+  if (goal_text.active) {
+    textAlign(CENTER, CENTER);
+    textSize(goal_text.size);
+    fill(255, 255, 0, goal_text.alpha); // Yellow with transparency
+    text("GOAL!", goal_text.x, goal_text.y);
+
+    // Growth phase
+    if (goal_text.growing) {
+      goal_text.size += 4;  // Increase text size
+      if (goal_text.size >= goal_text.max_size) {
+        goal_text.growing = false; // Switch to fade-out phase
+      }
+    } else {
+      goal_text.alpha -= 5; // Gradually fade out
+    }
+
+    // Remove text when fully transparent
+    if (goal_text.alpha <= 0) {
+      goal_text.active = false;
+    }
+  }
+}
+function trigger_goal_text() {
+  goal_text.active = true;
+  goal_text.size = 20;
+  goal_text.alpha = 255;
+  goal_text.growing = true;
+  goal_text.x = canvasWidth / 2;
+  goal_text.y = padding * 4;
+}
+function display_goal_text() {
+
+  fill(1);
+  textSize(16);
+  textAlign(CENTER, TOP);
+
+  let x = canvasWidth / 2;
+  let y = padding * 4;
+
+  text("GOAL!", x, y);
 }
 
 

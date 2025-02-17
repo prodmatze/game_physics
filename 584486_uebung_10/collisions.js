@@ -130,7 +130,7 @@ function triangle_collision(ball_x, ball_y) {
 }
 
 function check_hole_top(ball_x) {
-  if ((ball_x - ball_d / 2 < -metric.right_rect_width) && ball_x + ball_d / 2 > -metric.right_rect_width - metric.hole_width) {
+  if ((ball_x < -metric.right_rect_width - ball_d / 2) && ball_x > -metric.right_rect_width - metric.hole_width + ball_d / 2) {
     return true;
   } else {
     return false;
@@ -145,7 +145,7 @@ function check_hole_left(ball_x, ball_y) {
     y2: metric.height
   }
   let dist_to_left_segment = distance_to_segment(ball_x, ball_y, hole_left_segment);
-  if (dist_to_left_segment <= ball_d / 2) {
+  if ((dist_to_left_segment <= ball_d / 2) && (ball_y + ball_d / 2 < metric.height)) {
     return true;
   } else {
     return false;
@@ -160,7 +160,7 @@ function check_hole_right(ball_x, ball_y) {
     y2: metric.height
   }
   let dist_to_right_segment = distance_to_segment(ball_x, ball_y, hole_right_segment);
-  if (dist_to_right_segment <= ball_d / 2) {
+  if (dist_to_right_segment <= ball_d / 2 && ball_y + ball_d / 2 < metric.height) {
     return true;
   } else {
     return false;
