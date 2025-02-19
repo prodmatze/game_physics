@@ -304,7 +304,7 @@ function draw() {
   if (remaining_attempts > 0) {
     status_text = ` Remaining attempts: ${remaining_attempts}\n\n⛳ Score: ${score} 🏌️`;
   } else {
-    status_text = `No more attempts 😔\n\n⛳ Score: ${score} 🏌️`
+    status_text = `No more attempts😔\n\n⛳ Score: ${score} 🏌️`
   }
 
 
