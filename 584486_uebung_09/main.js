@@ -131,6 +131,7 @@ function setup() {
   new_button.style('padding', '15px 30px');
   new_button.style('border-radius', '10px');
 
+  //button interactions
   test_score_button = createButton("TEST SCORE");
   style_button(test_score_button);
   test_score_button.mousePressed(test_ball_scoring);
@@ -138,9 +139,13 @@ function setup() {
   show_info_button = createButton("Show Info");
   style_button(show_info_button);
   show_info_button.mousePressed(toggle_info);
-  //button interactions
   reset_button.mousePressed(reset_game);
   new_button.mousePressed(new_attempt);
+
+  test_in_flight_collision_button = createButton("TEST FLIGHT COLLISION");
+  test_in_flight_collision_button.mousePressed(test_in_flight_collision);
+  style_button(test_in_flight_collision_button);
+
 }
 
 function style_button(button) {
@@ -407,7 +412,7 @@ function draw() {
         let ball_distance = ball_collision.distance;
         let ball_penetration = ball_collision.penetration;
 
-        if (ball_penetration > 0) {
+        if (ball_penetration < 0) {
           correct_penetration(ball_distance, ball_penetration);
         }
 
@@ -595,6 +600,17 @@ function test_ball_scoring() {
   ball_velocity_x = -3;
 }
 
+function test_in_flight_collision() {
+  reset_balls();
+  remaining_attempts -= 1;
+  wind_speed = 0;
+  game_state = STATE_MOVING_IN_AIR;
+  ball_x = red_ball_x + 1;
+  ball_y = red_ball_y + 1;
+  ball_velocity_x = -3.7;
+  ball_velocity_y -= 2;
+}
+
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
@@ -603,6 +619,7 @@ function position_buttons() {
   test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
   position_obstacle_button.position(canvasWidth - padding - 400, canvasHeight - padding * 0.8)
   show_info_button.position(padding + 50, padding)
+  test_in_flight_collision_button.position(canvasWidth - padding * 3, padding * 2)
 }
 
 function mouseX_to_internal(mouse_x) {
