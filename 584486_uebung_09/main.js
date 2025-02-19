@@ -68,7 +68,7 @@ let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 
-let plane_friction = 1;
+let plane_friction = 0.99;
 
 let gravity = 9.81;
 
@@ -422,7 +422,7 @@ function draw() {
       break;
 
     case STATE_MOVING_ON_PLANE:
-      check_collisions(ball_x, ball_y);
+      check_collisions();
       //apply gravity if ball is higher than ground
       if (ball_y > metric.height + ball_d / 2) {
         ball_velocity_y -= gravity * dt;
@@ -445,6 +445,13 @@ function draw() {
       ball_velocity_x *= plane_friction;
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
+
+      if (check_hole_top(red_ball_x)) {
+        red_ball_velocity_y -= gravity * dt;
+      }
+      red_ball_velocity_x *= plane_friction;
+      red_ball_x += red_ball_velocity_x * dt;
+      red_ball_y += red_ball_velocity_y * dt;
       update_end_state(ball_current_velocity);
       break;
 
@@ -472,6 +479,8 @@ function draw() {
         game_ended = true;
         alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
       }
+
+      check_collisions();
 
 
       break;
@@ -541,7 +550,6 @@ function test_ball_collision() {
   direction = "left";
   game_state = STATE_MOVING_ON_PLANE;
   if (direction == "left") {
-    red_ball_x = 8;
     ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
     ball_velocity_x = -2.5;
