@@ -67,6 +67,7 @@ let num_ball_bounces = 0;
 let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
+let red_ball_current_velocity = 0;
 
 let plane_friction = 0.99;
 
@@ -250,7 +251,7 @@ let ball_d = 0.15;
 let ball_cross_section_a = Math.PI * (ball_d / 2) * (ball_d / 2);
 
 //red ball
-let red_ball_x = -playground.width / 2 + 1;
+let red_ball_x = -playground.width / 2 + 0.5;
 let red_ball_y = metric.height + metric.ball_diameter / 2;
 let red_ball_d = metric.ball_diameter;
 
@@ -264,15 +265,15 @@ let my;
 
 let info_panel_width = 200;
 
-function update_end_state(ball_current_velocity) {
+function update_end_state(ball_current_velocity, red_ball_current_velocity) {
   if (check_hole_top(ball_x)) {
-    if (ball_current_velocity < 0.01 || num_ball_bounces > 10) {
+    if ((ball_current_velocity < 0.01 || num_ball_bounces > 10) && red_ball_current_velocity < 0.1) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
   }
   if (game_state == STATE_MOVING_ON_PLANE) {
-    if (ball_current_velocity < 0.01) {
+    if (ball_current_velocity < 0.01 && red_ball_current_velocity < 0.1) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
@@ -315,9 +316,8 @@ function draw() {
 
   dt = deltaTime / 1000;
   ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
+  red_ball_current_velocity = Math.sqrt(red_ball_velocity_x * red_ball_velocity_x + red_ball_velocity_y * red_ball_velocity_y)
 
-  red_ball_x += red_ball_velocity_x * dt;
-  red_ball_y += red_ball_velocity_y * dt;
   /* display */
   push();
 
@@ -402,6 +402,20 @@ function draw() {
     case STATE_MOVING_IN_AIR:
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
+      let ball_collision = check_ball_collision();
+      if (ball_collision) {
+        let ball_distance = ball_collision.distance;
+        let ball_penetration = ball_collision.penetration;
+
+        if (ball_penetration > 0) {
+          correct_penetration(ball_distance, ball_penetration);
+        }
+
+        let new_velocities = central_elastic_collision_velocity_swap(ball_velocity_x, red_ball_velocity_x);
+        ball_velocity_x = new_velocities.ball_01_vx;
+        ball_velocity_y = new_velocities.ball_01_vy;
+      }
+
       ball_acceleration_x = drag.ax;
       ball_acceleration_y = drag.ay - gravity;
 
@@ -414,7 +428,7 @@ function draw() {
       check_collisions_in_flight(ball_x, ball_y)
       check_collisions();
       //red_ball_velocity_y -= gravity * dt;
-      update_end_state(ball_current_velocity);
+      update_end_state(ball_current_velocity, red_ball_current_velocity);
 
       if (ball_y < -10) {
         game_state = STATE_END_MOVEMENT;
@@ -423,6 +437,11 @@ function draw() {
 
     case STATE_MOVING_ON_PLANE:
       check_collisions();
+      if (check_ball_collision()) {
+        let new_velocities = central_elastic_collision_velocity_swap(ball_velocity_x, red_ball_velocity_x);
+        ball_velocity_x = new_velocities.ball_01_vx;
+        red_ball_velocity_x = new_velocities.ball_02_vx;
+      }
       //apply gravity if ball is higher than ground
       if (ball_y > metric.height + ball_d / 2) {
         ball_velocity_y -= gravity * dt;
@@ -452,17 +471,18 @@ function draw() {
       red_ball_velocity_x *= plane_friction;
       red_ball_x += red_ball_velocity_x * dt;
       red_ball_y += red_ball_velocity_y * dt;
-      update_end_state(ball_current_velocity);
+      update_end_state(ball_current_velocity, red_ball_current_velocity);
       break;
 
     case STATE_END_MOVEMENT:
+      red_ball_velocity_x = 0;
+      red_ball_velocity_y = 0;
       if (check_hole_top(ball_x)) {
         if (!scored) {
           scored = true;
           score++;
           particles_1 = spawn_particles(ball_x, ball_y, 40);
           particles_2 = spawn_particles(-playground.width / 2, playground.height / 2, 200);
-
         }
         draw_particles(particles_1);
         //draw_particles(particles_2);
@@ -477,7 +497,7 @@ function draw() {
 
       if (remaining_attempts <= 0 && !game_ended) {
         game_ended = true;
-        alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
+        alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${5 - score}`);
       }
 
       check_collisions();
@@ -520,7 +540,7 @@ function reset_balls() {
   ball_acceleration_y = 0;
   play_ball_is_in_hole = false;
 
-  red_ball_x = -playground.width / 2 + 1;
+  red_ball_x = -playground.width / 2 + 0.5;
   red_ball_y = metric.height + metric.ball_diameter / 2;
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
@@ -529,6 +549,7 @@ function reset_balls() {
   ball_has_bounced = false;
   num_ball_bounces = 0;
   ball_current_velocity = 0;
+  red_ball_current_velocity = 0;
   ball_initial_bounce_velocity = 0;
   scored = false;
   ball_stopped = false;
@@ -536,20 +557,23 @@ function reset_balls() {
 }
 
 function position_ball_to_triangle() {
+  remaining_attempts -= 1;
   reset_balls();
   //ball_x = triangle_coords.x1 + ball_d / 2;
   ball_x = triangle_coords.x1 + 1;
-  ball_y = triangle_coords.y1 + ball_d / 5;
+  ball_y = triangle_coords.y1 + 0.2;
 
   ball_velocity_y += gravity * dt;
   game_state = STATE_MOVING_IN_AIR;
 }
 
 function test_ball_collision() {
+  remaining_attempts -= 1;
   reset_balls();
   direction = "left";
   game_state = STATE_MOVING_ON_PLANE;
   if (direction == "left") {
+    //red_ball_x = 10;
     ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
     ball_velocity_x = -2.5;

@@ -14,7 +14,25 @@ let hole_right_segment = {
   y2: metric.height
 };
 
+function check_ball_collision_best_practice(ball_01_x, ball_01_y, ball_02_x, ball_02_y, ball_r) {
+  let distance = (ball_01_x - ball_02_x) ** 2 + (ball_01_y - ball_02_y) ** 2
+  if (distance <= ball_r) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
+function check_ball_collision() {
+  let distance = dist(ball_x, ball_y, red_ball_x, red_ball_y)
+
+  let penetration = ball_d - distance;
+  if (distance <= ball_d) {
+    return { collision: true, distance: distance, penetration: penetration };
+  } else {
+    return false;
+  }
+}
 
 function in_triangle_range(ball_x) {
   if (ball_x - ball_d / 2 < triangle_coords.x3) {

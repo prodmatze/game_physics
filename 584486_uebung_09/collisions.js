@@ -3,26 +3,6 @@
 /* Übung Nr.10 */
 /* Datum: 14.02.2025 */
 
-// function update_game_state(current_bounce_velocity) {
-//   if (!ball_has_bounced) {
-//     ball_has_bounced = true;
-//     ball_initial_bounce_velocity = current_bounce_velocity;
-//   }
-//   if ((current_bounce_velocity <= ball_initial_bounce_velocity * 0.1) && !check_hole_top(ball_x) && !in_triangle_range(ball_x)) {
-//     game_state = STATE_MOVING_ON_PLANE;
-//   }
-// }
-
-function ball_collision(ball_0_x, ball_0_y, ball_1_x, ball_1_y) {
-  distance = dist(ball_0_x, ball_0_y, ball_1_x, ball_1_y);
-  if (distance < ball_d) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 function ground_collision(ball_x, ball_y) {
   if ((ball_y - ball_d / 2 <= metric.height) && (ball_x < 0) && (ball_x > -metric.right_rect_width - metric.left_rect_width - metric.hole_width)) {
     return true;
@@ -197,7 +177,7 @@ function check_collisions() {
         ball_velocity_y = 0;
       }
     }
-    if (check_hole_top) {
+    if (check_hole_top(ball_x)) {
       if (check_hole_left(ball_x, ball_y)) {
         ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
         ball_velocity_x = -ball_velocity_x * ball_bounce;
@@ -208,6 +188,46 @@ function check_collisions() {
       }
     }
   }
+  //ground collision for play_red_ball
+  if (!check_hole_top(red_ball_x)) {
+    if (ground_collision(red_ball_x, red_ball_y) && game_state != STATE_ON_CATAPULT) {
+      if (game_state == STATE_MOVING_IN_AIR) {
+        red_ball_y = metric.height + ball_d / 2;
+        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
+        red_ball_velocity_x *= ball_bounce
+      } else {
+        red_ball_y = metric.height + ball_d / 2;
+        red_ball_velocity_x *= plane_friction;
+        red_ball_velocity_y = 0;
+      }
+    }
+  } else {
+    console.log("PLAYred_ball IS OVER HOLE");
+    if (hole_ground_collision(red_ball_y)) {
+      if (red_ball_current_velocity > 0.01) {
+        console.log("PLAYred_ball BALL GROUND COLLISION AT: ", Math.abs(red_ball_velocity_y))
+        red_ball_y = metric.hole_height + ball_d / 2;
+        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
+        red_ball_velocity_y -= gravity * dt;
+      } else {
+        red_ball_velocity_x *= plane_friction;
+        red_ball_y = metric.hole_height + ball_d / 2;
+        red_ball_velocity_y = 0;
+      }
+    }
+    if (check_hole_top(red_ball_x)) {
+      if (check_hole_left(red_ball_x, red_ball_y)) {
+        red_ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
+        red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
+      }
+      if (check_hole_right(red_ball_x, red_ball_y)) {
+        red_ball_x = -metric.right_rect_width - ball_d / 2;
+        red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
+      }
+    }
+  }
+
+  /*
   //ground collision for red_ball
   if (!check_hole_top(red_ball_x)) {
     if (ground_collision(red_ball_x, red_ball_y)) {
@@ -241,6 +261,7 @@ function check_collisions() {
       red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
     }
   }
+  */
 
   //wall collision for play_ball
   if (wall_collision(ball_x, ball_y)) {
@@ -253,42 +274,6 @@ function check_collisions() {
     red_ball_x = -metric.right_rect_width - metric.left_rect_width - metric.hole_width + metric.schornstein_width + ball_d;
     red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
   }
-  //checks which ball is faster to make them collide accordingly
-  if (Math.abs(ball_velocity_x) > Math.abs(red_ball_velocity_x)) {
-    if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
-      if (ball_velocity_x < 0) {
-        red_ball_x = ball_x - ball_d;
-      } else if (ball_velocity_x > 0) {
-        red_ball_x = ball_x + ball_d;
-      }
-      red_ball_velocity_x = ball_velocity_x * 0.6;
-      ball_velocity_x *= 0.4;
-    }
-  } else if (Math.abs(ball_velocity_x) < Math.abs(red_ball_velocity_x)) {
-    if (ball_collision(red_ball_x, red_ball_y, ball_x, ball_y)) {
-      if (red_ball_velocity_x < 0) {
-        ball_x = red_ball_x - ball_d;
-      } else if (red_ball_velocity_x > 0) {
-        ball_x = red_ball_x + ball_d;
-      }
-      ball_velocity_x = red_ball_velocity_x * 0.6;
-      red_ball_velocity_x *= 0.4;
-    }
-  }
-
-
-  /*
-  //check if balls collide vertically
-  if (ball_collision(ball_x, ball_y, red_ball_x, red_ball_y)) {
-    if (ball_y - ball_d > red_ball_y + ball_d) {
-      ball_y = red_ball_y + ball_d;
-      //ball_velocity_y = -ball_velocity_y * 0.2;
-    } else if (red_ball_y - ball_d > ball_velocity_y + ball_d) {
-      red_ball_y = ball_y + ball_d;
-      //red_ball_velocity_y = -red_ball_velocity_y * 0.2;
-    }
-  }
-  */
 
   //obstacle collision for play_ball
   if (obstacle_collision_left(ball_x, ball_y)) {
@@ -379,5 +364,28 @@ function check_collisions() {
 
 
   }
+}
 
+function ball_collision_in_flight() {
+}
+
+function correct_penetration(distance, penetration) {
+  let dx = (red_ball_x - ball_x) / distance;
+  let dy = (red_ball_y - ball_y) / distance;
+
+  ball_x -= dx * (penetration / 2);
+  ball_y -= dx * (penetration / 2);
+
+  red_ball_x += dx * (penetration / 2);
+  red_ball_y += dy * (penetration / 2);
+}
+
+
+//swaps velocities
+function central_elastic_collision_velocity_swap(ball_01_vx, ball_02_vx) {
+  let new_velocities = {
+    ball_01_vx: ball_02_vx,
+    ball_02_vx: ball_01_vx,
+  }
+  return new_velocities
 }
