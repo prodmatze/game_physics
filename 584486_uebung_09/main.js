@@ -69,7 +69,7 @@ let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
 let red_ball_current_velocity = 0;
 
-let plane_friction = 0.99;
+let plane_friction = 1;
 
 let gravity = 9.81;
 
@@ -408,17 +408,23 @@ function draw() {
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
 
       let ball_collision = check_ball_collision();
+
       if (ball_collision) {
+        console.log("BALL COLLISION DETECTED: ", ball_collision)
         let ball_distance = ball_collision.distance;
         let ball_penetration = ball_collision.penetration;
+        console.log("ball_distance: ", ball_distance)
+        console.log("ball_penetration ", ball_penetration)
 
-        if (ball_penetration < 0) {
+        if (ball_collision && ball_penetration > 0) {
+          console.log("BALL PENETRATION > 0! : ",)
           correct_penetration(ball_distance, ball_penetration);
         }
 
         let new_velocities = central_elastic_collision_velocity_swap(ball_velocity_x, red_ball_velocity_x);
         ball_velocity_x = new_velocities.ball_01_vx;
-        ball_velocity_y = new_velocities.ball_01_vy;
+        red_ball_velocity_x = new_velocities.ball_02_vx;
+        console.log("Red balls velocity after collision: ", red_ball_velocity_x)
       }
 
       ball_acceleration_x = drag.ax;
@@ -429,6 +435,11 @@ function draw() {
 
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
+
+      red_ball_x += red_ball_velocity_x * dt;
+      red_ball_y += red_ball_velocity_y * dt;
+
+      console.log("Red balls final velocity :", red_ball_velocity_x);
 
       check_collisions_in_flight(ball_x, ball_y)
       check_collisions();

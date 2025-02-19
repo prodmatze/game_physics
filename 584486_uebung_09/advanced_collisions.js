@@ -270,11 +270,10 @@ function update_velocity(ball_velocity_x, ball_velocity_y) {
 function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
   for (let segment of segments) {
     let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
-    console.log(collision)
     if (collision) {
 
-      console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
-      console.log("COLLISION NORMAL: ", collision.normal.x);
+      //console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
+      //console.log("COLLISION NORMAL: ", collision.normal.x);
       let current_bounce_velocity = Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y)
 
       update_game_state(current_bounce_velocity);

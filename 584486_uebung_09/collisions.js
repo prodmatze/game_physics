@@ -194,7 +194,7 @@ function check_collisions() {
       if (game_state == STATE_MOVING_IN_AIR) {
         red_ball_y = metric.height + ball_d / 2;
         red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-        red_ball_velocity_x *= ball_bounce
+        //red_ball_velocity_x *= ball_bounce
       } else {
         red_ball_y = metric.height + ball_d / 2;
         red_ball_velocity_x *= plane_friction;
@@ -374,7 +374,7 @@ function correct_penetration(distance, penetration) {
   let dy = (red_ball_y - ball_y) / distance;
 
   ball_x -= dx * (penetration / 2);
-  ball_y -= dx * (penetration / 2);
+  ball_y -= dy * (penetration / 2);
 
   red_ball_x += dx * (penetration / 2);
   red_ball_y += dy * (penetration / 2);
