@@ -191,20 +191,19 @@ function check_collisions() {
   //ground collision for play_red_ball
   if (!check_hole_top(red_ball_x)) {
     if (ground_collision(red_ball_x, red_ball_y) && game_state != STATE_ON_CATAPULT) {
-      if (game_state == STATE_MOVING_IN_AIR) {
+      if (red_ball_velocity_y > 2) {
         red_ball_y = metric.height + ball_d / 2;
         red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-        //red_ball_velocity_x *= ball_bounce
+        red_ball_velocity_x *= ball_bounce
       } else {
         red_ball_y = metric.height + ball_d / 2;
         red_ball_velocity_x *= plane_friction;
-        red_ball_velocity_y = 0;
       }
     }
   } else {
     console.log("PLAYred_ball IS OVER HOLE");
     if (hole_ground_collision(red_ball_y)) {
-      if (red_ball_current_velocity > 0.01) {
+      if (game_state == STATE_MOVING_IN_AIR) {
         console.log("PLAYred_ball BALL GROUND COLLISION AT: ", Math.abs(red_ball_velocity_y))
         red_ball_y = metric.hole_height + ball_d / 2;
         red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
@@ -226,42 +225,6 @@ function check_collisions() {
       }
     }
   }
-
-  /*
-  //ground collision for red_ball
-  if (!check_hole_top(red_ball_x)) {
-    if (ground_collision(red_ball_x, red_ball_y)) {
-      if (Math.abs(red_ball_velocity_y) >= bounce_velocity_threshold) {
-        red_ball_velocity_y += gravity * dt;
-        red_ball_y = metric.height + ball_d / 2;
-        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-      } else {
-        red_ball_velocity_x *= plane_friction;
-        red_ball_velocity_y = 0;
-      }
-    }
-  } else {
-    if (hole_ground_collision(red_ball_y)) {
-      if (Math.abs(red_ball_velocity_y) >= bounce_velocity_threshold) {
-        console.log("RED BALL GROUND COLLISION AT: ", Math.abs(red_ball_velocity_y))
-        red_ball_velocity_y = -red_ball_velocity_y * ball_bounce;
-        red_ball_velocity_y += gravity * dt;
-        red_ball_velocity_x *= plane_friction;
-      } else {
-        red_ball_y = metric.hole_height + ball_d / 2;
-        red_ball_velocity_y = 0;
-      }
-    }
-    if (check_hole_left(red_ball_x, red_ball_y)) {
-      red_ball_x = -metric.right_rect_width - metric.hole_width + ball_d / 2;
-      red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
-    }
-    if (check_hole_right(red_ball_x, red_ball_y)) {
-      red_ball_x = -metric.right_rect_width - red_ball_d / 2;
-      red_ball_velocity_x = -red_ball_velocity_x * ball_bounce;
-    }
-  }
-  */
 
   //wall collision for play_ball
   if (wall_collision(ball_x, ball_y)) {
@@ -348,8 +311,8 @@ function check_collisions() {
 
     //ball_x, ball_y, ball_velocity_slope = roll_down_slope(ball_x, ball_y);
     if (pen_depth >= 0) {
-      ball_x += orthogonal_edge_vector.x * (pen_depth + 0.01)
-      ball_y += orthogonal_edge_vector.y * (pen_depth + 0.01)
+      red_ball_x += orthogonal_edge_vector.x * (pen_depth + 0.01)
+      red_ball_y += orthogonal_edge_vector.y * (pen_depth + 0.01)
     }
 
     let velocity_vector = createVector(red_ball_velocity_x, red_ball_velocity_y)

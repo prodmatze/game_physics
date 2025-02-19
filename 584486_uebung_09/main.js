@@ -13,7 +13,7 @@ const padding = 100;
 //game meta variables
 let score = 0;
 let remaining_attempts = 5;
-let status_text = `Score: ${score} - Remaining attempts: ${remaining_attempts}`;
+let status_text = `Score: ${score} \n Remaining attempts: ${remaining_attempts}`;
 let dt = 0;
 
 let min_radius = 0.3;
@@ -302,10 +302,11 @@ function draw() {
 
   //status text
   if (remaining_attempts > 0) {
-    status_text = `⛳ Score: ${score} - Remaining attempts: ${remaining_attempts} 🏌️`;
+    status_text = ` Remaining attempts: ${remaining_attempts}\n\n⛳ Score: ${score} 🏌️`;
   } else {
-    status_text = `⛳ Score: ${score} - No remaining attempts! 😔`
+    status_text = `No more attempts 😔\n\n⛳ Score: ${score} 🏌️`
   }
+
 
   textAlign(CENTER, TOP);
   textSize(32);
@@ -436,6 +437,10 @@ function draw() {
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
+      if (check_hole_top(red_ball_x) || red_ball_y - ball_d / 2 > metric.height) {
+        red_ball_velocity_y = -gravity * dt;
+      }
+      red_ball_velocity_x *= plane_friction;
       red_ball_x += red_ball_velocity_x * dt;
       red_ball_y += red_ball_velocity_y * dt;
 
@@ -513,6 +518,7 @@ function draw() {
 
       if (remaining_attempts <= 0 && !game_ended) {
         game_ended = true;
+        status_text = "Reset the game to play again!"
         alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${5 - score}`);
       }
 
@@ -533,6 +539,8 @@ function new_attempt() {
   if (remaining_attempts > 0) {
     reset_balls();
     game_state = STATE_START;
+  } else {
+    alert("Sorry, you don't have any remaining attempts.\nRestart the game to play again.")
   }
 }
 
