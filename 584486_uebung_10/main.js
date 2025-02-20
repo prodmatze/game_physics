@@ -278,7 +278,7 @@ function update_end_state(ball_current_velocity, red_ball_current_velocity) {
     }
   }
   if (game_state == STATE_MOVING_ON_PLANE) {
-    if (ball_current_velocity < 0.01 && red_ball_current_velocity < 0.1) {
+    if (ball_current_velocity < 0.01 && red_ball_current_velocity < 1 && red_ball_y <= metric.hole_height + ball_d / 2) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
@@ -625,10 +625,11 @@ function test_ball_scoring() {
 function test_in_flight_collision() {
   reset_balls();
   remaining_attempts -= 1;
+  wind_speed = 17;
   game_state = STATE_MOVING_IN_AIR;
   ball_x = red_ball_x + 1.05;
   ball_y = red_ball_y + 1;
-  ball_velocity_x = -3.7;
+  ball_velocity_x = -3.9;
   ball_velocity_y -= 2;
 }
 
