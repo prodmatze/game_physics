@@ -32,9 +32,6 @@ let scored = false;
 let ball_stopped = false;
 let failed_attempts = 0;
 
-let is_first_shot = true;
-let is_last_shot = false;
-
 let game_ended = false;
 
 let game_state = STATE_START;
@@ -70,6 +67,7 @@ let num_ball_bounces = 0;
 let ball_has_bounced = false;
 let ball_initial_bounce_velocity = 0;
 let ball_current_velocity = 0;
+let red_ball_current_velocity = 0;
 
 let plane_friction = 0.99;
 
@@ -133,6 +131,7 @@ function setup() {
   new_button.style('padding', '15px 30px');
   new_button.style('border-radius', '10px');
 
+  //button interactions
   test_score_button = createButton("TEST SCORE");
   style_button(test_score_button);
   test_score_button.mousePressed(test_ball_scoring);
@@ -140,9 +139,13 @@ function setup() {
   show_info_button = createButton("Show Info");
   style_button(show_info_button);
   show_info_button.mousePressed(toggle_info);
-  //button interactions
   reset_button.mousePressed(reset_game);
   new_button.mousePressed(new_attempt);
+
+  test_in_flight_collision_button = createButton("TEST FLIGHT COLLISION");
+  test_in_flight_collision_button.mousePressed(test_in_flight_collision);
+  style_button(test_in_flight_collision_button);
+
 }
 
 function style_button(button) {
@@ -253,7 +256,7 @@ let ball_d = 0.15;
 let ball_cross_section_a = Math.PI * (ball_d / 2) * (ball_d / 2);
 
 //red ball
-let red_ball_x = -playground.width / 2 + 1;
+let red_ball_x = -playground.width / 2 + 0.5;
 let red_ball_y = metric.height + metric.ball_diameter / 2;
 let red_ball_d = metric.ball_diameter;
 
@@ -267,15 +270,15 @@ let my;
 
 let info_panel_width = 200;
 
-function update_end_state(ball_current_velocity) {
+function update_end_state(ball_current_velocity, red_ball_current_velocity) {
   if (check_hole_top(ball_x)) {
-    if (ball_current_velocity < 0.01 || num_ball_bounces > 15) {
+    if ((ball_current_velocity < 0.01 || num_ball_bounces > 10) && red_ball_current_velocity < 0.1) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
   }
   if (game_state == STATE_MOVING_ON_PLANE) {
-    if (ball_current_velocity < 0.01) {
+    if (ball_current_velocity < 0.01 && red_ball_current_velocity < 0.1) {
       console.log("SWITCHING NOW!!");
       game_state = STATE_END_MOVEMENT;
     }
@@ -298,13 +301,12 @@ function draw() {
   position_buttons();
 
   //status text
-  if (!game_ended) {
-    if (remaining_attempts > 0) {
-      status_text = ` Remaining attempts: ${remaining_attempts}\n\n⛳ Score: ${score} 🏌️`;
-    } else {
-      status_text = `No more attempts😔\n\n⛳ Score: ${score} 🏌️`
-    }
+  if (remaining_attempts > 0) {
+    status_text = ` Remaining attempts: ${remaining_attempts}\n\n⛳ Score: ${score} 🏌️`;
+  } else {
+    status_text = `No more attempts😔\n\n⛳ Score: ${score} 🏌️`
   }
+
 
   textAlign(CENTER, TOP);
   textSize(32);
@@ -320,15 +322,10 @@ function draw() {
 
   dt = deltaTime / 1000;
   ball_current_velocity = Math.sqrt(ball_velocity_x * ball_velocity_x + ball_velocity_y * ball_velocity_y)
-
-  red_ball_x += red_ball_velocity_x * dt;
-  red_ball_y += red_ball_velocity_y * dt;
-
+  red_ball_current_velocity = Math.sqrt(red_ball_velocity_x * red_ball_velocity_x + red_ball_velocity_y * red_ball_velocity_y)
 
   /* display */
   push();
-
-
 
   translate(canvasWidth - padding, canvasHeight - padding);
 
@@ -342,13 +339,6 @@ function draw() {
   draw_scene(wind_speed);
   segments = generate_segments();
 
-  // stroke("magenta");
-  // strokeWeight(0.005);
-  // line(ball_x + ball_d / 2 + 0.1, metric.height, -metric.right_rect_width - metric.hole_width, metric.height)
-
-  if (remaining_attempts == 1) {
-    is_last_shot = true;
-  }
 
   switch (game_state) {
     case STATE_START:
@@ -358,9 +348,6 @@ function draw() {
         noFill();
         stroke(0, 0, 255);
         strokeWeight(1 / M);
-
-        text("asjdasdja", -3, 5);
-
 
         //draw_min radius circle 
         ellipse(slingshot_metrics.center_x, slingshot_metrics.center_y, min_radius * 2, min_radius * 2);
@@ -411,10 +398,8 @@ function draw() {
       ball_velocity_y -= spring_acceleration_y * dt
 
       if (spring_displacement <= 0) {
-        if (is_first_shot) {
-          remaining_attempts -= 1;
-        }
         game_state = STATE_MOVING_IN_AIR;
+        remaining_attempts -= 1;
       }
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
@@ -422,6 +407,26 @@ function draw() {
 
     case STATE_MOVING_IN_AIR:
       let drag = calculate_drag(ball_velocity_x, ball_velocity_y, c_w, density_air, ball_mass, ball_cross_section_a, wind_speed)
+
+      let ball_collision = check_ball_collision();
+
+      if (ball_collision) {
+        console.log("BALL COLLISION DETECTED: ", ball_collision)
+        let ball_distance = ball_collision.distance;
+        let ball_penetration = ball_collision.penetration;
+        console.log("ball_distance: ", ball_distance)
+        console.log("ball_penetration ", ball_penetration)
+
+        if (ball_collision && ball_penetration > 0) {
+          console.log("BALL PENETRATION > 0! : ",)
+          correct_penetration(ball_distance, ball_penetration);
+        }
+
+        let new_velocities = central_elastic_collision_velocity_swap(ball_velocity_x, red_ball_velocity_x);
+        ball_velocity_x = new_velocities.ball_01_vx;
+        red_ball_velocity_x = new_velocities.ball_02_vx;
+        console.log("Red balls velocity after collision: ", red_ball_velocity_x)
+      }
 
       ball_acceleration_x = drag.ax;
       ball_acceleration_y = drag.ay - gravity;
@@ -432,12 +437,19 @@ function draw() {
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
 
+      if (check_hole_top(red_ball_x) || red_ball_y - ball_d / 2 > metric.height) {
+        red_ball_velocity_y = -gravity * dt;
+      }
+      red_ball_velocity_x *= plane_friction;
+      red_ball_x += red_ball_velocity_x * dt;
+      red_ball_y += red_ball_velocity_y * dt;
+
+      console.log("Red balls final velocity :", red_ball_velocity_x);
+
       check_collisions_in_flight(ball_x, ball_y)
       check_collisions();
       //red_ball_velocity_y -= gravity * dt;
-      update_end_state(ball_current_velocity);
-
-
+      update_end_state(ball_current_velocity, red_ball_current_velocity);
 
       if (ball_y < -10) {
         game_state = STATE_END_MOVEMENT;
@@ -445,7 +457,12 @@ function draw() {
       break;
 
     case STATE_MOVING_ON_PLANE:
-      check_collisions(ball_x, ball_y);
+      check_collisions();
+      if (check_ball_collision()) {
+        let new_velocities = central_elastic_collision_velocity_swap(ball_velocity_x, red_ball_velocity_x);
+        ball_velocity_x = new_velocities.ball_01_vx;
+        red_ball_velocity_x = new_velocities.ball_02_vx;
+      }
       //apply gravity if ball is higher than ground
       if (ball_y > metric.height + ball_d / 2) {
         ball_velocity_y -= gravity * dt;
@@ -464,48 +481,51 @@ function draw() {
       if (in_triangle_range(ball_x)) {
         //implement TRIANGLE_STATE later
         ball_velocity_x = 0;
-        game_state = STATE_END_MOVEMENT;
       }
       ball_velocity_x *= plane_friction;
       ball_x += ball_velocity_x * dt;
       ball_y += ball_velocity_y * dt;
-      update_end_state(ball_current_velocity);
+
+      if (check_hole_top(red_ball_x)) {
+        red_ball_velocity_y -= gravity * dt;
+      }
+      red_ball_velocity_x *= plane_friction;
+      red_ball_x += red_ball_velocity_x * dt;
+      red_ball_y += red_ball_velocity_y * dt;
+      update_end_state(ball_current_velocity, red_ball_current_velocity);
       break;
 
     case STATE_END_MOVEMENT:
-      if (check_hole_top(ball_x)) {
+      red_ball_velocity_x = 0;
+      red_ball_velocity_y = 0;
+      if (check_hole_top(ball_x) || check_hole_top(red_ball_x)) {
         if (!scored) {
           scored = true;
           score++;
-          particles_1 = spawn_particles(ball_x, ball_y, 60);
+          particles_1 = spawn_particles(ball_x, ball_y, 40);
           particles_2 = spawn_particles(-playground.width / 2, playground.height / 2, 200);
-
-          pop();
-          trigger_goal_text();
-          draw_goal_text();
-          push();
-
-
         }
+
+
+
         draw_particles(particles_1);
         //draw_particles(particles_2);
 
       } else {
         if (!ball_stopped) {
           ball_stopped = true;
-
+          failed_attempts++;
           console.log(failed_attempts);
-          if (is_last_shot) {
-            failed_attempts++;
-          }
         }
       }
 
       if (remaining_attempts <= 0 && !game_ended) {
         game_ended = true;
         status_text = "Reset the game to play again!"
-        alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${failed_attempts}`);
+        alert(`YOUR GAME IS OVER!\nYOUR SCORE: ${score}\nFAILED ATTEMPS: ${5 - score}`);
       }
+
+      check_collisions();
 
 
       break;
@@ -519,14 +539,11 @@ function draw() {
 
 function new_attempt() {
   console.log("New attempt button was pressed!")
-  if (!scored) {
-    failed_attempts += 1;
-  }
   if (remaining_attempts > 0) {
     reset_balls();
     game_state = STATE_START;
   } else {
-    alert("Sorry, you don't have any remaining attempts.")
+    alert("Sorry, you don't have any remaining attempts.\nRestart the game to play again.")
   }
 }
 
@@ -535,7 +552,6 @@ function reset_game() {
   score = 0;
   failed_attempts = 0;
   remaining_attempts = 5;
-  is_first_shot = true;
   reset_balls();
   game_state = STATE_START;
 }
@@ -551,7 +567,7 @@ function reset_balls() {
   ball_acceleration_y = 0;
   play_ball_is_in_hole = false;
 
-  red_ball_x = -playground.width / 2 + 1;
+  red_ball_x = -playground.width / 2 + 0.5;
   red_ball_y = metric.height + metric.ball_diameter / 2;
   red_ball_velocity_x = 0;
   red_ball_velocity_y = 0;
@@ -560,6 +576,7 @@ function reset_balls() {
   ball_has_bounced = false;
   num_ball_bounces = 0;
   ball_current_velocity = 0;
+  red_ball_current_velocity = 0;
   ball_initial_bounce_velocity = 0;
   scored = false;
   ball_stopped = false;
@@ -567,21 +584,23 @@ function reset_balls() {
 }
 
 function position_ball_to_triangle() {
+  remaining_attempts -= 1;
   reset_balls();
   //ball_x = triangle_coords.x1 + ball_d / 2;
   ball_x = triangle_coords.x1 + 1;
-  ball_y = triangle_coords.y1 + ball_d / 5;
+  ball_y = triangle_coords.y1 + 0.2;
 
   ball_velocity_y += gravity * dt;
   game_state = STATE_MOVING_IN_AIR;
 }
 
 function test_ball_collision() {
+  remaining_attempts -= 1;
   reset_balls();
   direction = "left";
   game_state = STATE_MOVING_ON_PLANE;
   if (direction == "left") {
-    red_ball_x = 8;
+    //red_ball_x = 10;
     ball_x = -3.5;
     ball_y = metric.height + ball_d / 2;
     ball_velocity_x = -2.5;
@@ -603,6 +622,16 @@ function test_ball_scoring() {
   ball_velocity_x = -3;
 }
 
+function test_in_flight_collision() {
+  reset_balls();
+  remaining_attempts -= 1;
+  game_state = STATE_MOVING_IN_AIR;
+  ball_x = red_ball_x + 1.05;
+  ball_y = red_ball_y + 1;
+  ball_velocity_x = -3.7;
+  ball_velocity_y -= 2;
+}
+
 function position_buttons() {
   reset_button.position(padding + 10, canvasHeight - padding * 0.8);
   new_button.position(canvasWidth - padding - 120, canvasHeight - padding * 0.8);
@@ -611,6 +640,7 @@ function position_buttons() {
   test_ball_collision_button.position(canvasWidth / 2 - padding, canvasHeight - padding * 0.8);
   position_obstacle_button.position(canvasWidth - padding - 400, canvasHeight - padding * 0.8)
   show_info_button.position(padding + 50, padding)
+  test_in_flight_collision_button.position(canvasWidth - padding * 3, padding * 2)
 }
 
 function mouseX_to_internal(mouse_x) {
@@ -669,59 +699,6 @@ function display_info(mx, my) {
 
   text(`Ball current Velocity : ${ball_current_velocity}`, x, y);
   y += 24;
-}
-
-let goal_text = {
-  active: false,
-  size: 20,
-  max_size: 60,
-  x: null,
-  y: null,
-  alpha: 255,
-  growing: true
-}
-
-function draw_goal_text() {
-  if (goal_text.active) {
-    textAlign(CENTER, CENTER);
-    textSize(goal_text.size);
-    fill(255, 255, 0, goal_text.alpha); // Yellow with transparency
-    text("GOAL!", goal_text.x, goal_text.y);
-
-    // Growth phase
-    if (goal_text.growing) {
-      goal_text.size += 4;  // Increase text size
-      if (goal_text.size >= goal_text.max_size) {
-        goal_text.growing = false; // Switch to fade-out phase
-      }
-    } else {
-      goal_text.alpha -= 5; // Gradually fade out
-    }
-
-    // Remove text when fully transparent
-    if (goal_text.alpha <= 0) {
-      goal_text.active = false;
-    }
-  }
-}
-function trigger_goal_text() {
-  goal_text.active = true;
-  goal_text.size = 20;
-  goal_text.alpha = 255;
-  goal_text.growing = true;
-  goal_text.x = canvasWidth / 2;
-  goal_text.y = padding * 4;
-}
-function display_goal_text() {
-
-  fill(1);
-  textSize(16);
-  textAlign(CENTER, TOP);
-
-  let x = canvasWidth / 2;
-  let y = padding * 4;
-
-  text("GOAL!", x, y);
 }
 
 

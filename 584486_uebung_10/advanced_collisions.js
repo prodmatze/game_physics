@@ -272,27 +272,12 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
     let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
     if (collision) {
 
+      //console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
+      //console.log("COLLISION NORMAL: ", collision.normal.x);
       let current_bounce_velocity = Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y)
 
       update_game_state(current_bounce_velocity);
-
-      if (collision.type == 'endpoint' && ball_current_velocity > 5) {
-        console.log("Detected collision with ENDPOINT!! AT: ", collision.segment)
-
-        //move to point of collision
-        ball_x += ball_velocity_x * collision.t;
-        ball_y += ball_velocity_y * collision.t;
-
-        //reflect velocity
-        let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, collision.normal);
-        ball_velocity_x = reflection.velocity_x * ball_bounce;
-        ball_velocity_y = reflection.velocity_y * ball_bounce;
-
-        // //process remaining time
-        let remaining_time = dt - collision.t;
-        ball_x += ball_velocity_x * remaining_time;
-        ball_y += ball_velocity_y * remaining_time;
-      }
+      // update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
       // //move to point of collision
       // ball_x += ball_velocity_x * collision.t;
       // ball_y += ball_velocity_y * collision.t;
@@ -313,38 +298,6 @@ function check_collisions_in_flight(ball_pos_x, ball_pos_y) {
       // ball_y += ball_velocity_y * remaining_time;
       //
 
-
-      break; //exit after one collision
-    }
-  }
-}
-
-function check_collisions_in_flight_old(ball_pos_x, ball_pos_y) {
-  for (let segment of segments) {
-    let collision = compute_collision_time(ball_pos_x, ball_pos_y, ball_velocity_x, ball_velocity_y, segment, dt);
-    if (collision) {
-
-      console.log("Collision Detected with segment: ", segment.name, "at:", segment, "ball x: ", ball_x, "ball y: ", ball_y)
-      //move to point of collision
-      ball_x += ball_velocity_x * collision.t;
-      ball_y += ball_velocity_y * collision.t;
-
-      if (collision.penetration) {
-        ball_x -= collision.normal.x * collision.penetration;
-        ball_y -= collision.normal.y * collision.penetration;
-      }
-
-      //reflect velocity
-      let reflection = reflect_ball(ball_velocity_x, ball_velocity_y, collision.normal);
-      ball_velocity_x = reflection.velocity_x * ball_bounce;
-      ball_velocity_y = reflection.velocity_y * ball_bounce;
-
-      //process remaining time
-      let remaining_time = dt - collision.t;
-      ball_x += ball_velocity_x * remaining_time;
-      ball_y += ball_velocity_y * remaining_time;
-
-      update_game_state(Math.abs(ball_velocity_x * collision.normal.x + ball_velocity_y * collision.normal.y));
 
       break; //exit after one collision
     }
